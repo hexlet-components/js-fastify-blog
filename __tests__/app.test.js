@@ -1,12 +1,13 @@
 import fastify from 'fastify';
-import configure from '../app.js'
+import fp from 'fastify-plugin';
+import App from '../app.js';
 
 let app;
 
 describe('server test', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     app = fastify();
-    configure(app);
+    await app.register(fp(App), {});
   });
 
   afterAll(() => {
