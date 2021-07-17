@@ -6,7 +6,7 @@ import AutoLoad from 'fastify-autoload'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default async function (fastify, opts = {}) {
+export default async (fastify, opts) => {
   // Place here your custom code!
 
   // Do not touch the following lines
@@ -19,8 +19,8 @@ export default async function (fastify, opts = {}) {
     options: Object.assign({}, opts)
   });
 
-  // This loads all plugins defined in routes
-  // define your routes in one of these
+  // // This loads all plugins defined in routes
+  // // define your routes in one of these
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'routes'),
     options: Object.assign({}, opts)
