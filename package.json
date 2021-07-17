@@ -1,0 +1,39 @@
+{
+  "name": "javascript-fastify-blog",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "type": "module",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest",
+    "start": "fastify start -l info app.js",
+    "dev": "fastify start -w -l info -P app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hexlet-components/javascript-fastify-blog.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hexlet-components/javascript-fastify-blog/issues"
+  },
+  "jest": {
+    "transform": {}
+  },
+  "homepage": "https://github.com/hexlet-components/javascript-fastify-blog#readme",
+  "dependencies": {
+    "fastify": "^3.0.0",
+    "fastify-autoload": "^3.3.1",
+    "fastify-cli": "^2.9.1",
+    "fastify-plugin": "^3.0.0",
+    "fastify-sensible": "^3.1.0"
+  },
+  "devDependencies": {
+    "jest": "^27.0.6"
+  }
+}
