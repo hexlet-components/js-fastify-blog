@@ -34,6 +34,8 @@
     "fastify-sensible": "^3.1.0"
   },
   "devDependencies": {
+    "@jest/globals": "^27.0.6",
+    "eslint": "^7.30.0",
     "jest": "^27.0.6"
   }
 }

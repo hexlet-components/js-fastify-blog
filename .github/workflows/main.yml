@@ -15,4 +15,6 @@ jobs:
     - name: Install Dependencies
       run: npm install --ignore-scripts
     - name: Test
-      run: npm run test
+      run: make test
+    - name: Lint
+      run: make lint

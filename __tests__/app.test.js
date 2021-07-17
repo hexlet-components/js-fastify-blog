@@ -1,3 +1,4 @@
+import { describe, beforeAll, afterAll, test, expect } from '@jest/globals'
 import fastify from 'fastify';
 import fp from 'fastify-plugin';
 import App from '../app.js';
