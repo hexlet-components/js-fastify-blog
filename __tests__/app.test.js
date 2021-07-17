@@ -10,8 +10,8 @@ describe('server test', () => {
     await app.register(fp(App), {});
   });
 
-  afterAll(() => {
-    app.close();
+  afterAll(async () => {
+    await app.close();
   });
 
   test('responds with success on request /', async () => {
