@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "jest",
-    "start": "fastify start -l info app.js",
+    "start": "fastify start -a 0.0.0.0 -l info app.js",
     "dev": "fastify start -w -l info -P app.js"
   },
   "repository": {
