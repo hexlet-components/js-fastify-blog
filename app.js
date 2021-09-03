@@ -2,7 +2,7 @@
 
 import path from 'path'
 import { fileURLToPath } from 'url';
-import AutoLoad from 'fastify-autoload'
+import AutoLoad from 'fastify-autoload';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
