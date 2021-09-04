@@ -7,6 +7,8 @@ import AutoLoad from 'fastify-autoload';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default async (fastify, opts) => {
+  const mode = process.env.NODE_ENV ?? 'development';
+  fastify.decorate('mode', mode);
   // Place here your custom code!
 
   // Do not touch the following lines
