@@ -38,4 +38,22 @@ export default async (fastify) => {
     reply.render('index');
     return reply;
   });
+
+  fastify.delete('/articles/:id', async (req, reply) => {
+    const { id } = req.params;
+    const article = await fastify.db.models.Article.findByPk(id);
+
+    try {
+      if (article) {
+        await article.destroy();
+      }
+      req.flash('info', fastify.t('views.article.delete.success'));
+    } catch ({ errors }) {
+      req.flash('error', fastify.t('views.article.delete.error'));
+    }
+
+    reply.redirect(fastify.reverse('articles'));
+    return reply;
+  });
+
 };

@@ -22,4 +22,8 @@ block content
             td
               .d-flex
                 a.btn.btn-primary.me-1(href=route('editArticle', { id: article.id }))= t('views.article.edit.link')
-                +buttonTo(route('article', { id: article.id }), 'delete')(class="btn btn-danger" value=t('views.article.delete.submit'))
+                +buttonTo(route('article', { id: article.id }), 'delete')(
+                  class="btn btn-danger"
+                  value=t('views.article.delete.submit')
+                  onclick=`return confirm('${t('views.article.delete.confirmation')}')`
+                )
