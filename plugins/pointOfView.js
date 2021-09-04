@@ -5,11 +5,13 @@ import pointOfView from 'point-of-view';
 import Pug from 'pug';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import helpers from '../helpers/index.js';
+import getHelpers from '../helpers/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default fp(async (fastify) => {
+  const helpers = getHelpers(fastify);
+
   fastify.register(pointOfView, {
     engine: {
       pug: Pug,
@@ -17,8 +19,11 @@ export default fp(async (fastify) => {
     includeViewExtension: true,
     defaultContext: {
       ...helpers,
-      assetPath: (filename) => `${domain}/assets/${filename}`,
     },
     templates: path.join(__dirname, '..', 'views'),
+  });
+
+  fastify.decorateReply('render', function render(viewPath, locals) {
+    this.view(viewPath, { ...locals, reply: this });
   });
 });
