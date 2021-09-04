@@ -1,0 +1,14 @@
+extends ../layouts/application.pug
+
+block header
+  = t('views.article.create.title')
+
+block content
+  +formFor()(action=route('articles') method='post')
+    +input(article, 'name', errors)(type="text")
+    +textarea(article, 'content', errors)(
+      placeholder=t('views.article.content.placeholder')
+      class="h-100"
+      rows="10"
+    )
+    +submit(article)(value=t('views.article.create.submit'))

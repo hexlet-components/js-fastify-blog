@@ -14,15 +14,29 @@ export default {
         more: 'Узнать Больше',
       },
       article: {
-        create: 'Создать статью',
-        id: 'ID',
-        name: 'Название',
-        createdAt: 'Дата создания',
-        new: {
+        id: {
+          title: 'ID',
+        },
+        name: {
+          title: 'Название',
+          placeholder: 'Напишите название статьи',
+        },
+        content: {
+          title: 'Содержание',
+          placeholder: 'Напишите содержание здесь',
+        },
+        createdAt: {
+          title: 'Дата создания',
+        },
+        create: {
+          link: 'Создать статью',
           title: 'Создание статьи',
           submit: 'Создать',
+          error: 'Не удалось создать статью',
+          success: 'Статья успешно создана',
         },
         edit: {
+          link: 'Изменить',
           title: 'Изменение статьи',
           submit: 'Изменить',
         },

@@ -1,13 +1,15 @@
 - const getEntityName = (entity) => _.camelCase(entity.constructor.name)
 - const getInputName = (property) => `data[${property}]`
 - const getInputId = (property) => `data_${property}`
+- const getError = (errors, propertyName) => errors.find((error) => error.path === propertyName)
+- const getErrorText = (errors, propertyName) => _.groupBy(errors, 'path')[propertyName].map(({ message }) => message).join('. ')
 
 mixin formFor(entity = null)
-  form&attributes(attributes)
+  form.mb-3&attributes(attributes)
     block
 
-mixin input(entity, propertyName, errors = {})
-  - error = _.get(errors, propertyName)
+mixin input(entity, propertyName, errors = [])
+  - error = getError(errors, propertyName)
   - inputName = getInputName(propertyName)
   - inputId = getInputId(propertyName)
   - entityName = getEntityName(entity)
@@ -20,27 +22,27 @@ mixin input(entity, propertyName, errors = {})
       placeholder= t(`views.${entityName}.${propertyName}`)
     )&attributes(attributes)
     if error
-      .form-control-feedback(class=(error && 'invalid-feedback'))= error.map(({ message }) => message).join('. ')
+      .form-control-feedback(class=(error && 'invalid-feedback'))= getErrorText(errors, propertyName)
     label(
       for= inputId
-    )= t(`views.${entityName}.${propertyName}`)
+    )= t(`views.${entityName}.${propertyName}.title`)
    
-mixin textarea(entity, propertyName, errors = {})
-  - error = _.get(errors, propertyName)
+mixin textarea(entity, propertyName, errors = [])
+  - error = getError(errors, propertyName)
   - inputName = getInputName(propertyName)
   - inputId = getInputId(propertyName)
   - entityName = getEntityName(entity)
-  .mb-3
-    label(
-      for= inputId
-    )= t(`views.${entityName}.${propertyName}`)
+  .form-floating.mb-3
     textarea.form-control(
       id= inputId
       name= inputName
       class=(error && 'is-invalid')
     )&attributes(attributes)= _.get(entity, propertyName, '')
     if error
-      .form-control-feedback(class=(error && 'invalid-feedback'))= error.map(({ message }) => message).join('. ')
+      .form-control-feedback(class=(error && 'invalid-feedback'))= getErrorText(errors, propertyName)
+    label(
+      for= inputId
+    )= t(`views.${entityName}.${propertyName}.title`)
 
 mixin submit(form = null)
   input(class='btn btn-primary' type='submit')&attributes(attributes)
