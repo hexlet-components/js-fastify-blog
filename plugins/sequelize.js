@@ -2,7 +2,7 @@
 
 import fp from 'fastify-plugin';
 import sequelizeFastify from 'sequelize-fastify';
-import dbConfig from '../config/config.js';
+import dbConfig from '../config/config.cjs';
 
 export default fp(async (fastify) => {
   const mode = process.env.NODE_ENV ?? 'development';

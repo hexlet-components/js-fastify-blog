@@ -1,4 +1,3 @@
-import { describe, beforeAll, afterAll, test, expect } from '@jest/globals'
 import fastify from 'fastify';
 import fp from 'fastify-plugin';
 import App from '../app.js';
@@ -18,7 +17,7 @@ describe('server test', () => {
   test('responds with success on request /', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/'
+      url: '/',
     });
 
     expect(response.statusCode).toBe(200);
