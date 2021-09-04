@@ -5,7 +5,6 @@ import i18next from 'i18next';
 import ru from '../locales/ru.js';
 
 export default fp(async (fastify) => {
-  console.log(fastify.mode);
   await i18next
     .init({
       lng: 'ru',
