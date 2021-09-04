@@ -1,0 +1,20 @@
+extends ../layouts/application.pug
+
+block header
+  = article.name
+
+block content
+  div.row.mt-5.p-5.shadow.bg-white
+    div.col-12.col-md-8.order-2.order-md-1
+      div.lead.fw-normal.mb-4= article.content
+    div.col-12.col-md-4.border-start.px-3.order-1.order-md-2.mb-3.mb-md-0
+      div.d-flex.flex-wrap.mb-3
+        span.text-muted.me-2= t('views.article.createdAt.title')
+        span= formatDate(article.createdAt)
+      div.d-flex.flex-wrap
+        a.btn.btn-primary.me-1(href=route('editArticle', { id: article.id }))= t('views.article.edit.link')
+        +buttonTo(route('article', { id: article.id }), 'delete')(
+          class="btn btn-danger"
+            value=t('views.article.delete.submit')
+            onclick=`return confirm('${t('views.article.delete.confirmation')}')`
+          )

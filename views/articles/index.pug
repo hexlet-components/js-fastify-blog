@@ -17,7 +17,8 @@ block content
         each article in articles
           tr
             td.align-middle= article.id
-            td.align-middle= article.name
+            td.align-middle
+              a(href=route('article', { id: article.id }))= article.name
             td.align-middle= formatDate(article.createdAt)
             td
               .d-flex

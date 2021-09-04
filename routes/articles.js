@@ -30,7 +30,9 @@ export default async (fastify) => {
   });
 
   fastify.get('/articles/:id', { name: 'article' }, async (req, reply) => {
-    reply.render('index');
+    const { id } = req.params;
+    const article = await fastify.db.models.Article.findByPk(id);
+    reply.render('articles/show', { article });
     return reply;
   });
 
@@ -57,7 +59,7 @@ export default async (fastify) => {
     }
 
     return reply;
-  })
+  });
 
   fastify.delete('/articles/:id', async (req, reply) => {
     const { id } = req.params;
@@ -75,5 +77,4 @@ export default async (fastify) => {
     reply.redirect(fastify.reverse('articles'));
     return reply;
   });
-
 };
