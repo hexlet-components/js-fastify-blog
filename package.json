@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "jest",
-    "start": "fastify start -a 0.0.0.0 -l info app.js",
+    "migrate": "sequelize db:migrate",
+    "prestart": "NODE_ENV=production npm run migrate",
+    "start": "NODE_ENV=production fastify start -a 0.0.0.0 -l info app.js",
     "dev": "fastify start -w -l info -P app.js"
   },
   "repository": {
@@ -27,17 +29,20 @@
   },
   "homepage": "https://github.com/hexlet-components/javascript-fastify-blog#readme",
   "dependencies": {
+    "dotenv": "^10.0.0",
     "fastify": "^3.20.2",
     "fastify-autoload": "^3.8.1",
     "fastify-cli": "^2.13.0",
     "fastify-plugin": "^3.0.0",
     "fastify-sensible": "^3.1.1",
     "pg": "^8.7.1",
-    "sequelize-fastify": "^1.0.9"
+    "sequelize-fastify": "^1.0.9",
+    "sqlite3": "^5.0.2"
   },
   "devDependencies": {
     "@jest/globals": "^27.1.0",
     "eslint": "^7.32.0",
-    "jest": "^27.1.0"
+    "jest": "^27.1.0",
+    "sequelize-cli": "^6.2.0"
   }
 }
