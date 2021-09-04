@@ -14,5 +14,5 @@ export default fp(async (fastify) => {
         ru,
       },
     });
-  fastify.decorate('t', (...args) => i18next.t(...args));
+  fastify.decorate('t', (key) => i18next.t(key));
 });

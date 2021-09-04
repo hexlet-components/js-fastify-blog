@@ -1,0 +1,51 @@
+- const getEntityName = (entity) => _.camelCase(entity.constructor.name)
+- const getInputName = (property) => `data[${property}]`
+- const getInputId = (property) => `data_${property}`
+
+mixin formFor(entity = null)
+  form&attributes(attributes)
+    block
+
+mixin input(entity, propertyName, errors = {})
+  - error = _.get(errors, propertyName)
+  - inputName = getInputName(propertyName)
+  - inputId = getInputId(propertyName)
+  - entityName = getEntityName(entity)
+  .form-floating.mb-3
+    input.form-control(
+      id= inputId
+      name= inputName
+      class=(error && 'is-invalid')
+      value=_.get(entity, propertyName, '')
+      placeholder= t(`views.${entityName}.${propertyName}`)
+    )&attributes(attributes)
+    if error
+      .form-control-feedback(class=(error && 'invalid-feedback'))= error.map(({ message }) => message).join('. ')
+    label(
+      for= inputId
+    )= t(`views.${entityName}.${propertyName}`)
+   
+mixin textarea(entity, propertyName, errors = {})
+  - error = _.get(errors, propertyName)
+  - inputName = getInputName(propertyName)
+  - inputId = getInputId(propertyName)
+  - entityName = getEntityName(entity)
+  .mb-3
+    label(
+      for= inputId
+    )= t(`views.${entityName}.${propertyName}`)
+    textarea.form-control(
+      id= inputId
+      name= inputName
+      class=(error && 'is-invalid')
+    )&attributes(attributes)= _.get(entity, propertyName, '')
+    if error
+      .form-control-feedback(class=(error && 'invalid-feedback'))= error.map(({ message }) => message).join('. ')
+
+mixin submit(form = null)
+  input(class='btn btn-primary' type='submit')&attributes(attributes)
+
+mixin buttonTo(action, method)
+  form(action=action, method="post")
+    input(name="_method" type="hidden" value=method)
+    input(type='submit')&attributes(attributes)

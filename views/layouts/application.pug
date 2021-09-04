@@ -1,3 +1,5 @@
+include ../mixins/forms.pug
+
 doctype html
 html(lang=ru)
   head
@@ -13,7 +15,7 @@ html(lang=ru)
         .collapse.navbar-collapse(id="navbarToggleExternalContent")
           ul.navbar-nav.justify-content-end.w-100
             li.nav-item.me-auto
-              a.nav-link(href=route('root'))= t('layouts.application.articles')
+              a.nav-link(href=route('articles'))= t('layouts.application.articles')
 
     .container.wrapper.flex-grow-1
       each messages, type in reply.flash() || []
