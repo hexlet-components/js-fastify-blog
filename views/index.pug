@@ -1,0 +1,11 @@
+extends layouts/application.pug
+
+block content
+  .container
+    .row
+      .col-12
+        .card.shadow.bg-white.rounded-3
+          .card-body.p-5
+            .display-4.fw-bold.mb-0= t('views.index.hello')
+            p.lead= t('views.index.description')
+            a.btn.btn-primary.btn-lg.px-4.mt-3.fw-bold(href="https://hexlet.io" target="_blank")= t('views.index.more')

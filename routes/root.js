@@ -1,7 +1,8 @@
 // @ts-check
 
 export default async (fastify) => {
-  fastify.get('/', async () => {
-    return 'Hello, World!';
+  fastify.get('/', { name: 'root' }, async (req, reply) => {
+    reply.render('index');
+    return reply;
   });
-}
+};

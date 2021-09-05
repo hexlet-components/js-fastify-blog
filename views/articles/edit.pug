@@ -1,0 +1,15 @@
+extends ../layouts/application.pug
+
+block header
+  = t('views.article.edit.title')
+
+block content
+  +formFor()(action=route('article', { id: article.id }) method='post')
+    +input(article, 'name', errors)(type="text")
+    +textarea(article, 'content', errors)(
+      placeholder=t('views.article.content.placeholder')
+      class="h-100"
+      rows="10"
+    )
+    input(name="_method" type="hidden" value="patch")
+    +submit(article)(value=t('views.article.edit.submit'))
