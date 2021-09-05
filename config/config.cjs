@@ -6,8 +6,10 @@ module.exports = {
     storage: './database.sqlite',
   },
   test: {
+    // NOTE: при выполнении проекта нужно использовать подключение к postgresql
+    // Конфиг нужно скопировать из production и зменить им содержимое конфига test
     dialect: 'sqlite',
-    storage: ':memory:',
+    storage: './database.test.sqlite',
   },
   production: {
     dialect: 'postgres',

@@ -6,7 +6,7 @@ let app;
 
 describe('server test', () => {
   beforeAll(async () => {
-    app = fastify();
+    app = await fastify();
     await app.register(fp(App), {});
   });
 
@@ -18,6 +18,18 @@ describe('server test', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/',
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('test GET request /articles', async () => {
+    const articles = await app.db.models.Article.findAll();
+    console.log(articles);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/articles',
     });
 
     expect(response.statusCode).toBe(200);
