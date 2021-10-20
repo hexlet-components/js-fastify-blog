@@ -1,11 +1,8 @@
 // @ts-check
 
-import fp from 'fastify-plugin';
-// import sequelizeFastify from 'sequelize-fastify';
-// import dbConfig from '../config/config.cjs';
 import db from '../models/index.cjs';
 
-export default fp(async (fastify) => {
+export default (fastify) => {
   fastify.decorate('db', db.sequelize);
   fastify.addHook('onClose', async () => {
     await db.sequelize.close();
@@ -27,4 +24,4 @@ export default fp(async (fastify) => {
   // });
   // // eslint-disable-next-line
   // fastify.db.models = db.sequelize.models;
-});
+};

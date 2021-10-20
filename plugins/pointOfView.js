@@ -1,6 +1,5 @@
 // @ts-check
 
-import fp from 'fastify-plugin';
 import pointOfView from 'point-of-view';
 import Pug from 'pug';
 import path from 'path';
@@ -9,7 +8,7 @@ import getHelpers from '../helpers/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default fp(async (fastify) => {
+export default (fastify) => {
   const helpers = getHelpers(fastify);
 
   fastify.register(pointOfView, {
@@ -26,4 +25,4 @@ export default fp(async (fastify) => {
   fastify.decorateReply('render', function render(viewPath, locals) {
     this.view(viewPath, { ...locals, reply: this });
   });
-});
+};

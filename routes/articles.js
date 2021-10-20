@@ -1,6 +1,6 @@
 // @ts-check
 
-export default async (fastify) => {
+export default (fastify) => {
   fastify.get('/articles', { name: 'articles' }, async (req, reply) => {
     const articles = await fastify.db.models.Article.findAll();
     reply.render('articles/index', { articles });

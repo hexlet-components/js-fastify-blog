@@ -1,6 +1,5 @@
 // @ts-check
 
-import fp from 'fastify-plugin';
 import fastifySensible from 'fastify-sensible';
 
 /**
@@ -8,8 +7,8 @@ import fastifySensible from 'fastify-sensible';
  *
  * @see https://github.com/fastify/fastify-sensible
  */
-export default fp(async (fastify) => {
+export default (fastify) => {
   fastify.register(fastifySensible, {
     errorHandler: false,
   });
-});
+};
