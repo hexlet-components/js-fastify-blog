@@ -10,9 +10,10 @@
   "scripts": {
     "migrate": "sequelize db:migrate",
     "pretest": "NODE_ENV=test sequelize db:migrate:undo && NODE_ENV=test npm run migrate",
-    "test": "jest --runInBand",
+    "test": "jest --ci",
     "prestart": "NODE_ENV=production npm run migrate",
     "start": "NODE_ENV=production fastify start -a 0.0.0.0 -p 8080 -l info app.js",
+    "predev": "npm run migrate",
     "dev": "fastify start -w -l info -P app.js"
   },
   "repository": {
@@ -27,37 +28,34 @@
   },
   "homepage": "https://github.com/hexlet-components/javascript-fastify-blog#readme",
   "dependencies": {
-    "bootstrap": "^5.1.0",
+    "bootstrap": "^5.1.3",
     "dotenv": "^10.0.0",
-    "fastify": "^3.20.2",
-    "fastify-autoload": "^3.8.1",
+    "fastify": "^3.22.1",
     "fastify-cli": "^2.13.0",
     "fastify-error-page": "^4.0.0",
     "fastify-flash": "^2.0.2",
     "fastify-formbody": "^5.1.0",
     "fastify-method-override": "^1.5.6",
-    "fastify-plugin": "^3.0.0",
     "fastify-reverse-routes": "^3.0.0",
-    "fastify-secure-session": "^2.3.1",
+    "fastify-secure-session": "^3.0.0",
     "fastify-sensible": "^3.1.1",
-    "fastify-static": "^4.2.3",
-    "i18next": "^20.6.0",
+    "fastify-static": "^4.4.2",
+    "i18next": "^21.3.2",
     "lodash": "^4.17.21",
     "pg": "^8.7.1",
     "point-of-view": "^4.15.2",
     "pug": "^3.0.2",
     "qs": "^6.10.1",
-    "sequelize": "^6.6.5",
+    "sequelize": "^6.7.0",
     "sequelize-cli": "^6.2.0",
-    "sequelize-fastify": "^1.0.9",
     "sqlite3": "^5.0.2"
   },
   "devDependencies": {
-    "@jest/globals": "^27.1.0",
-    "eslint": "^7.32.0",
+    "@jest/globals": "^27.3.1",
+    "eslint": "^8.0.1",
     "eslint-config-airbnb-base": "^14.2.1",
-    "eslint-plugin-import": "^2.24.2",
-    "eslint-plugin-jest": "^24.4.0",
-    "jest": "^27.1.0"
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-jest": "^25.2.2",
+    "jest": "^27.3.1"
   }
 }

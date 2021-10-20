@@ -1,8 +1,7 @@
 // @ts-check
 
-import fp from 'fastify-plugin';
 import fastifyMethodOverride from 'fastify-method-override';
 
-export default fp(async (fastify) => {
+export default (fastify) => {
   fastify.register(fastifyMethodOverride);
-});
+};

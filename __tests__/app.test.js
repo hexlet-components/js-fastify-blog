@@ -1,15 +1,14 @@
 import fastify from 'fastify';
-import fp from 'fastify-plugin';
-import App from '../app.js';
-
-let app;
+import buildApp from '../app.js';
 
 // TODO: сейчас каждый тест оставляет после себя артефакты в БД
 // попытатся использовать транзакции или перед каждым тестом очищать БД
 describe('server test', () => {
+  let app;
+
   beforeAll(async () => {
-    app = await fastify();
-    await app.register(fp(App), {});
+    app = fastify();
+    await buildApp(app);
   });
 
   afterAll(async () => {

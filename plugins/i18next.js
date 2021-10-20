@@ -1,11 +1,10 @@
 // @ts-check
 
-import fp from 'fastify-plugin';
 import i18next from 'i18next';
 import ru from '../locales/ru.js';
 
-export default fp(async (fastify) => {
-  await i18next
+export default (fastify) => {
+  i18next
     .init({
       lng: 'ru',
       fallbackLng: 'ru',
@@ -13,6 +12,8 @@ export default fp(async (fastify) => {
       resources: {
         ru,
       },
+    })
+    .then(() => {
+      fastify.decorate('t', (key) => i18next.t(key));
     });
-  fastify.decorate('t', (key) => i18next.t(key));
-});
+};
