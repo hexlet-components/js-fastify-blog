@@ -1,2 +1,2 @@
-release: npm run prestart
-web: fastify start -l info app.js
+release: npm run migrate
+web: fastify start -a 0.0.0.0 -l info app.js
