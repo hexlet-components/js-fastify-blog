@@ -4,7 +4,7 @@
 
 ## Требования
 
-* NodeJS v16.13.2
+* NodeJS v14.18.1
 * Sqlite или PostgreSQL
 
 ## Команды
