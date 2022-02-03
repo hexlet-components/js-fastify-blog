@@ -15,3 +15,6 @@ test:
 
 heroku-logs:
 	heroku logs --tail
+
+prepare-env:
+	cp -n .env.example .env
