@@ -1,6 +1,6 @@
 # JS Fastify Blog
 
-[![Main](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml/badge.svg)](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml)
+[![Node CI](https://github.com/hexlet-components/js-fastify-blog/workflows/Node%20CI/badge.svg)](https://github.com/hexlet-components/js-fastify-blog/actions)
 
 ## Требования
 
@@ -15,7 +15,7 @@ make setup
 
 ## Запуск тестов с Postgres
 
-Для запуска тестов с Postgres необходимо отредактировать *config/config.cjs* и в под ключом `test` закомментировать использование SQLite и раскомментировать переменные окружения
+Для запуска тестов с Postgres необходимо отредактировать *config/config.cjs* и под ключом `test` закомментировать использование SQLite и раскомментировать переменные окружения
 
 ```js
   // test: {
@@ -60,6 +60,6 @@ make start # Open in browser: http://localhost:8080
 
 ---
 
-[![Hexlet Ltd. logo](https://raw.githubusercontent.com/Hexlet/assets/master/images/hexlet_logo128.png)](https://ru.hexlet.io/pages/about?utm_source=github&utm_medium=link&utm_campaign=exercises-javascript)
+[![Hexlet Ltd. logo](https://raw.githubusercontent.com/Hexlet/assets/master/images/hexlet_logo128.png)](https://ru.hexlet.io/pages/about?utm_source=github&utm_medium=link&utm_campaign=js-fastify-blog)
 
 This repository is created and maintained by the team and the community of Hexlet, an educational project. [Read more about Hexlet (in Russian)](https://ru.hexlet.io/pages/about?utm_source=github&utm_medium=link&utm_campaign=js-fastify-blog).
