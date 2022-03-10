@@ -9,15 +9,19 @@ on:
       - main
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x]
 
     steps:
       - uses: actions/checkout@v2
-      - name: Setup Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
-          node-version: '14.18.1'
+          node-version: ${{ matrix.node-version }}
       - name: Install Dependencies
         run: npm ci
       - name: Test
@@ -26,20 +30,22 @@ jobs:
         run: make lint
 
 
-      - name: Set up Docker Buildx
-        if: ${{ github.event_name == 'push' }}
-        uses: docker/setup-buildx-action@v1
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
 
-      - name: Login to Docker Hub
-        if: ${{ github.event_name == 'push' }}
-        uses: docker/login-action@v1
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: docker/setup-buildx-action@v1
+
+      - uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
-        if: ${{ github.event_name == 'push' }}
-        uses: docker/build-push-action@v2
+      - uses: docker/build-push-action@v2
         with:
           context: .
           push: true
