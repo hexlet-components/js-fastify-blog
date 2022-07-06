@@ -1,21 +1,21 @@
 # JS Fastify Blog
 
-[![Node CI](https://github.com/hexlet-components/js-fastify-blog/workflows/Node%20CI/badge.svg)](https://github.com/hexlet-components/js-fastify-blog/actions)
+[![Main](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml/badge.svg)](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml)
 
-## Требования
+## Requirement
 
 * NodeJS v14.18.1
 * Sqlite или PostgreSQL
 
-## Команды
+## Commands
 
 ```bash
 make setup
 ```
 
-## Запуск тестов с Postgres
+## Run tests with Postgres
 
-Для запуска тестов с Postgres необходимо отредактировать *config/config.cjs* и под ключом `test` закомментировать использование SQLite и раскомментировать переменные окружения
+To run tests with Postgres, you need to edit *config/config.cjs* and under the `test` key comment out the use of SQLite and uncomment the environment variables
 
 ```js
   // test: {
@@ -32,13 +32,13 @@ make setup
   },
 ```
 
-Указать переменные окружения вручную или подготовить файл *.env* командой
+Specify environment variables manually or prepare a *.env* file with the command
 
 ```bash
 make env-prepare
 ```
 
-В нём указать данные для подключения к БД
+In it specify the data to connect to the database
 
 ```dotenv
 DATABASE_NAME=postgres
@@ -48,11 +48,11 @@ DATABASE_PORT=5432
 DATABASE_HOST=localhost
 ```
 
-## Запуск приложения с Postgres (продакшен)
+## Running an application with Postgres (production)
 
-Экспортировать переменные окружения для работы с БД или подготовить *.env* файл с переменными
+Export environment variables to work with the database or prepare a *.env* file with variables
 
-Запуск
+Run
 
 ```bash
 make start # Open in browser: http://localhost:8080
