@@ -35,7 +35,7 @@ To run tests with Postgres, you need to edit *config/config.cjs* and under the `
 Specify environment variables manually or prepare a *.env* file with the command
 
 ```bash
-make env-prepare
+make prepare-env
 ```
 
 In it specify the data to connect to the database
