@@ -12,6 +12,12 @@ module.exports = {
     password: process.env.DATABASE_PASSWORD,
     port: process.env.DATABASE_PORT,
     host: process.env.DATABASE_HOST,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   },
   test: {
     dialect: 'sqlite',
