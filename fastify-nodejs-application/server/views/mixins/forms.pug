@@ -1,5 +1,7 @@
 - const getInputName = (property) => `data[${property}]`
 - const getInputId = (property) => `data_${property}`
+- const getError = (errors, propertyName) => errors.find((error) => error.path === propertyName)
+- const getErrorText = (errors, propertyName) => _.groupBy(errors, 'path')[propertyName].map(({ message }) => message).join('. ')
 
 mixin formFor(entity = null)
   form&attributes(attributes)
@@ -21,6 +23,22 @@ mixin input(entity, propertyName, errors = {})
     )&attributes(attributes)
     if !_.isEmpty(propertyErrors)
       .invalid-feedback= propertyErrors.map(({ message }) => message).join('. ')
+
+mixin textarea(entity, propertyName, errors = [])
+  - propertyErrors = _.get(errors, propertyName)
+  - inputName = getInputName(propertyName)
+  - inputId = getInputId(propertyName)
+  .form-floating.mb-3
+    textarea.form-control(
+      id= inputId
+      name= inputName
+      class=(propertyErrors && 'is-invalid')
+    )&attributes(attributes)= _.get(entity, propertyName, '')
+    if !_.isEmpty(propertyErrors)
+      .invalid-feedback= propertyErrors.map(({ message }) => message).join('. ')
+    label(
+      for= inputId
+    )= propertyName
 
 mixin submit(form = null)
   input(class='btn btn-primary' type='submit')&attributes(attributes)

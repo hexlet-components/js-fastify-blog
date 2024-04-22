@@ -1,4 +1,5 @@
 include ../mixins/forms.pug
+include ../mixins/article.pug
 
 doctype html
 html(lang="en")
@@ -17,18 +18,8 @@ html(lang="en")
           .container-fluid
             ul.navbar-nav.mr-auto
               li.nav-item
-                a.nav-link(href=route('users'))= t('layouts.application.users')
-          ul.navbar-nav
-            if isAuthenticated()
-              li.nav-item
-                +buttonTo(route('session'), 'delete')(class="btn nav-link" value=t('layouts.application.signOut'))
-            else
-              li.nav-item
-                a.nav-link(href=route('newSession'))= t('layouts.application.signIn')
-              li.nav-item
-                a.nav-link(href=route('newUser'))= t('layouts.application.signUp')
+                a.nav-link(href=route('articles'))= t('layouts.application.articles')
     .container.wrapper.flex-grow-1
-
       each messages, type in reply.flash() || []
         each message in messages
           div.alert(class=`alert-${getAlertClass(type)}`)= message

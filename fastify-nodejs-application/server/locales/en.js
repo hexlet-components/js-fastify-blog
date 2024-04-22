@@ -23,28 +23,34 @@ export default {
     },
     layouts: {
       application: {
-        users: 'Users',
-        signIn: 'Login',
-        signUp: 'Register',
-        signOut: 'Logout',
+        articles: 'Articles',
       },
     },
     views: {
-      session: {
-        new: {
-          signIn: 'Login',
-          submit: 'Login',
+      article: {
+        content: {
+          placeholder: 'Enter article content',
         },
       },
-      users: {
-        id: 'ID',
-        email: 'Email',
-        createdAt: 'Created at',
-        new: {
-          submit: 'Register',
-          signUp: 'Register',
+      articles: {
+        index: {
+          header: 'Articles',
+          id: 'ID',
+          title: 'Title',
+          createdAt: 'Created at',
+          actions: 'Actions',
+          new: 'New article',
+          view: 'View',
+          edit: 'Edit',
+          delete_confirmation: 'Delete confirmation',
+          delete: 'Delete',
         },
+        edit: {
+          header: 'Edit article',
+          submit: 'Update'
+        }
       },
+
       welcome: {
         index: {
           hello: 'Hello from Hexlet!',

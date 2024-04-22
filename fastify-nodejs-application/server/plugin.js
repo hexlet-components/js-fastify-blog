@@ -8,7 +8,7 @@ import fastifyStatic from '@fastify/static';
 import fastifyView from '@fastify/view';
 import fastifyFormbody from '@fastify/formbody';
 import fastifySecureSession from '@fastify/secure-session';
-import fastifyPassport from '@fastify/passport';
+import fastifyFlash from '@fastify/flash';
 import fastifySensible from '@fastify/sensible';
 import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
 import fastifyMethodOverride from 'fastify-method-override';
@@ -24,12 +24,11 @@ import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
 import * as knexConfig from '../knexfile.js';
 import models from './models/index.js';
-import FormStrategy from './lib/passportStrategies/FormStrategy.js';
 
 const __dirname = fileURLToPath(path.dirname(import.meta.url));
 
 const mode = process.env.NODE_ENV || 'development';
-// const isDevelopment = mode === 'development';
+const isDevelopment = mode === 'development';
 
 const setUpViews = (app) => {
   const helpers = getHelpers(app);
@@ -63,7 +62,7 @@ const setupLocalization = async () => {
     .init({
       lng: 'en',
       fallbackLng: 'ru',
-      // debug: isDevelopment,
+      debug: isDevelopment,
       resources: {
         ru,
         en,
@@ -90,23 +89,7 @@ const registerPlugins = async (app) => {
       path: '/',
     },
   });
-
-  fastifyPassport.registerUserDeserializer(
-    (user) => app.objection.models.user.query().findById(user.id),
-  );
-  fastifyPassport.registerUserSerializer((user) => Promise.resolve(user));
-  fastifyPassport.use(new FormStrategy('form', app));
-  await app.register(fastifyPassport.initialize());
-  await app.register(fastifyPassport.secureSession());
-  await app.decorate('fp', fastifyPassport);
-  app.decorate('authenticate', (...args) => fastifyPassport.authenticate(
-    'form',
-    {
-      failureRedirect: app.reverse('root'),
-      failureFlash: i18next.t('flash.authError'),
-    },
-  // @ts-ignore
-  )(...args));
+  await app.register(fastifyFlash);
 
   await app.register(fastifyMethodOverride);
   await app.register(fastifyObjectionjs, {

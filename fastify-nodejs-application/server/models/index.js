@@ -1,7 +1,7 @@
 // @ts-check
 
-import User from './User.cjs';
+import Article from './Article.cjs';
 
 export default [
-  User,
+  Article,
 ];

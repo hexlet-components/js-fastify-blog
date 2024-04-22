@@ -13,7 +13,7 @@ prepare:
 	cp -n .env.example .env || true
 
 start:
-	heroku local -f Procfile.dev
+	npx concurrently "make start-frontend" "make start-backend"
 
 start-backend:
 	npm start -- --watch --verbose-watch --ignore-watch='node_modules .git .sqlite'

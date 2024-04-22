@@ -30,21 +30,6 @@ export default {
       },
     },
     views: {
-      session: {
-        new: {
-          signIn: 'Вход',
-          submit: 'Войти',
-        },
-      },
-      users: {
-        id: 'ID',
-        email: 'Email',
-        createdAt: 'Дата создания',
-        new: {
-          submit: 'Сохранить',
-          signUp: 'Регистрация',
-        },
-      },
       welcome: {
         index: {
           hello: 'Привет от Хекслета!',

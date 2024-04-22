@@ -1,13 +1,11 @@
 // @ts-check
 
-import welcome from './welcome.js';
-import users from './users.js';
-import session from './session.js';
+import root from './root.js';
+import articles from './articles.js';
 
 const controllers = [
-  welcome,
-  users,
-  session,
+  root,
+  articles,
 ];
 
 export default (app) => controllers.forEach((f) => f(app));
