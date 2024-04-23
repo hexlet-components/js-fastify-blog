@@ -1,6 +1,10 @@
-FROM node:14.18.1-slim
+FROM node:20-slim
 
-RUN apt-get update && apt-get install -yq make
+RUN apt-get update && apt-get install -yq \
+  build-essential \
+  python3
+
+RUN ln -s /usr/bin/python3 /usr/bin/python
 
 WORKDIR /app
 
@@ -11,4 +15,7 @@ RUN npm ci
 
 COPY . .
 
-CMD ["bash", "-c", "npm run migrate && npx fastify start -a 0.0.0.0 -l info -P app.js"]
+ENV NODE_ENV=production
+RUN make build
+
+CMD ["bash", "-c", "make start-backend"]
