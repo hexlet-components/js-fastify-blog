@@ -1,7 +1,7 @@
 // @ts-check
 
 import {
-  describe, beforeAll, it, expect,
+  describe, beforeAll, expect, test, afterAll
 } from '@jest/globals';
 
 import fastify from 'fastify';
@@ -22,7 +22,7 @@ describe('requests', () => {
     await init(app);
   });
 
-  it('GET 200', async () => {
+  test('GET 200', async () => {
     const res = await app.inject({
       method: 'GET',
       url: app.reverse('root'),
@@ -30,7 +30,7 @@ describe('requests', () => {
     expect(res.statusCode).toBe(200);
   });
 
-  it('GET 404', async () => {
+  test('GET 404', async () => {
     const res = await app.inject({
       method: 'GET',
       url: '/wrong-path',

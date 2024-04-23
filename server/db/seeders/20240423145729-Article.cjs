@@ -2,16 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    /**
-     * Add seed commands here.
-     *
-     * Example:
-     * await queryInterface.bulkInsert('People', [{
-     *   name: 'John Doe',
-     *   isBetaMember: false
-     * }], {});
-    */
+  async up (queryInterface) {
     return queryInterface.bulkInsert('articles', [
       {
         title: 'Test1',
@@ -22,7 +13,7 @@ module.exports = {
     ]);
   },
 
-  async down (queryInterface, Sequelize) {
+  async down (queryInterface) {
     await queryInterface.bulkDelete('articles', null, {});
     /**
      * Add commands to revert seed here.
