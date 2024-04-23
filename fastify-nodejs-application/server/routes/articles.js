@@ -5,7 +5,6 @@ import i18next from 'i18next';
 export default (app) => {
   app
     .get('/articles', { name: 'articles' }, async (req, reply) => {
-      console.log(app.db);
       const articles = await app.db.models.Article.findAll();
       reply.render('articles/index', { articles });
       return reply;
@@ -21,11 +20,11 @@ export default (app) => {
         await article.save();
         req.flash('info', i18next.t('views.article.create.success'));
         reply.redirect(app.reverse('articles'));
-      } catch ({ errors }) {
+      } catch (e) {
         req.flash('error', i18next.t('views.article.create.error'));
+        console.log(e);
         reply.code(422);
-        console.log(errors);
-        reply.render('articles/new', { article, errors });
+        reply.render('articles/new', { article, errors: e.errors });
       }
 
       return reply;
@@ -44,10 +43,19 @@ export default (app) => {
     })
     .patch('/articles/:id', async (req, reply) => {
       const { id } = req.params;
-      const articleData = req.body.data;
-      await app.objection.models.article.query().patch(articleData).findById(id);
-      req.flash('info', i18next.t('flash.articles.update.success'));
-      reply.redirect(app.reverse('articles'));
+      const article = await app.db.models.Article.findByPk(id);
+      Object.assign(article, req.body.data);
+
+      try {
+        await article.save();
+        req.flash('info', i18next.t('views.article.edit.success'));
+        reply.redirect(app.reverse('articles'));
+      } catch ({ errors }) {
+        req.flash('error', i18next.t('views.article.edit.error'));
+        reply.code(422);
+        reply.render('articles/edit', { article, errors });
+      }
+
       return reply;
     })
     .delete('/articles/:id', async (req, reply) => {
@@ -59,7 +67,8 @@ export default (app) => {
           await article.destroy();
         }
         req.flash('info', i18next.t('views.article.delete.success'));
-      } catch ({ errors }) {
+      } catch (e) {
+        console.log(e);
         req.flash('error', i18next.t('views.article.delete.error'));
       }
 

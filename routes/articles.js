@@ -20,10 +20,11 @@ export default (fastify) => {
       await article.save();
       req.flash('info', fastify.t('views.article.create.success'));
       reply.redirect(fastify.reverse('articles'));
-    } catch ({ errors }) {
+    } catch (e) {
       req.flash('error', fastify.t('views.article.create.error'));
       reply.code(422);
-      reply.render('articles/new', { article, errors });
+      console.log(e);
+      reply.render('articles/new', { article, errors: e.errors });
     }
 
     return reply;

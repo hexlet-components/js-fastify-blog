@@ -7,8 +7,11 @@
       "node": ">=16.x"
    },
    "scripts": {
+      "migrate": "sequelize db:migrate",
       "prebuild": "rm -rf dist",
       "test": "jest --verbose --runInBand",
+      "pretest": "NODE_ENV=test sequelize db:migrate:undo && NODE_ENV=test npm run migrate",
+      "prestart": "npm run migrate",
       "build": "webpack",
       "start": "fastify start server/plugin.js -l debug -P -o"
    },
