@@ -4,13 +4,14 @@
 
 ## Requirement
 
-* NodeJS v14.18.1
+* NodeJS v20.6.1
 * Sqlite или PostgreSQL
 
 ## Commands
 
 ```bash
 make setup
+make dev
 ```
 
 ## Run tests with Postgres
