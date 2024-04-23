@@ -19,11 +19,11 @@ block content
           td= article.title
           td= formatDate(article.createdAt)
           td
-            a.me-2(href=`/articles/${article.id}`)= t('layouts.actions.view')
-            a.me-2(href=`/articles/${article.id}/edit`)= t('layouts.actions.edit')
+            a.me-2(href=route('article', { id: article.id }))= t('layouts.actions.view')
+            a.me-2(href=route('editArticle', { id: article.id }))= t('layouts.actions.edit')
             //- FIXME Expected "id" to be a string
             a.me-2.text-danger(
-              href=`/articles/${article.id}`
+              href=route('article', { id: article.id })
               data-method="delete"
               data-confirm=t('views.articles.index.delete_confirmation')
               rel="nofollow"

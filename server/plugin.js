@@ -22,7 +22,6 @@ import en from './locales/en.js';
 // @ts-ignore
 import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
-import * as knexConfig from '../knexfile.js';
 import db from './db/models/index.cjs'
 
 const __dirname = fileURLToPath(path.dirname(import.meta.url));

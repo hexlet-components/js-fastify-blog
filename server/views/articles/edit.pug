@@ -4,7 +4,7 @@ block header
   = t('views.articles.edit.header')
 
 block content
-  +formFor()(action=`/articles/${article.id}` method='post')
+  +formFor()(action=route('article', { id: article.id }) method='post')
     +input(article, 'title', errors)(type="text")
     +textarea(article, 'content', errors)(
       placeholder=t('views.article.content.placeholder')
