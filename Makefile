@@ -1,4 +1,4 @@
-setup: prepare install db-migrate
+setup: install db-migrate
 
 install:
 	npm install
@@ -9,7 +9,7 @@ db-migrate:
 build:
 	npm run build
 
-prepare:
+prepare-env:
 	cp -n .env.example .env
 
 start:

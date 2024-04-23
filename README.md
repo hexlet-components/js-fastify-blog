@@ -10,7 +10,7 @@
 ## Commands
 
 ```bash
-make setup
+make install
 make dev
 ```
 
@@ -56,6 +56,7 @@ Export environment variables to work with the database or prepare a *.env* file 
 Run
 
 ```bash
+make build # build assets
 make start # Open in browser: http://localhost:8080
 ```
 
