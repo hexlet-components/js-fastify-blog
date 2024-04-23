@@ -59,6 +59,8 @@
       "pino-pretty": "^11.0.0",
       "pug": "^3.0.2",
       "qs": "^6.12.1",
+      "sequelize": "^6.37.3",
+      "sequelize-cli": "^6.6.2",
       "sqlite3": "^5.1.7",
       "webpack": "^5.91.0"
    },

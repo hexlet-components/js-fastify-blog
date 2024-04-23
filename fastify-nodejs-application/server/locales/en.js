@@ -2,28 +2,23 @@
 
 export default {
   translation: {
-    appName: 'Fastify Boilerplate',
+    appName: 'Simple blog',
     flash: {
-      session: {
+      articles: {
         create: {
-          success: 'You are logged in',
-          error: 'Wrong email or password',
-        },
-        delete: {
-          success: 'You are logged out',
-        },
-      },
-      users: {
-        create: {
-          error: 'Failed to register',
-          success: 'User registered successfully',
-        },
-      },
-      authError: 'Access denied! Please login',
+          error: 'Failed to create article',
+          success: 'Article was created',
+        }
+      }
     },
     layouts: {
       application: {
         articles: 'Articles',
+      },
+      actions: {
+        view: 'View',
+        edit: 'Edit',
+        delete: 'Delete',
       },
     },
     views: {
@@ -40,10 +35,7 @@ export default {
           createdAt: 'Created at',
           actions: 'Actions',
           new: 'New article',
-          view: 'View',
-          edit: 'Edit',
           delete_confirmation: 'Delete confirmation',
-          delete: 'Delete',
         },
         edit: {
           header: 'Edit article',

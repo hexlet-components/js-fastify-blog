@@ -26,6 +26,7 @@ export default (app) => ({
     }
   },
   formatDate(str) {
+    console.log(str);
     const date = new Date(str);
     return date.toLocaleString();
   },

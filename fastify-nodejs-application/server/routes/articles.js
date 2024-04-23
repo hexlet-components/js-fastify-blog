@@ -5,21 +5,35 @@ import i18next from 'i18next';
 export default (app) => {
   app
     .get('/articles', { name: 'articles' }, async (req, reply) => {
-      const articles = await app.objection.models.article.query();
+      console.log(app.db);
+      const articles = await app.db.models.Article.findAll();
       reply.render('articles/index', { articles });
+      return reply;
+    })
+    .get('/articles/new', { name: 'newArticle' }, (req, reply) => {
+      const article = app.db.models.Article.build();
+      reply.render('articles/new', { article });
+    })
+    .post('/articles', async (req, reply) => {
+      const article = app.db.models.Article.build(req.body.data);
+
+      try {
+        await article.save();
+        req.flash('info', i18next.t('views.article.create.success'));
+        reply.redirect(app.reverse('articles'));
+      } catch ({ errors }) {
+        req.flash('error', i18next.t('views.article.create.error'));
+        reply.code(422);
+        console.log(errors);
+        reply.render('articles/new', { article, errors });
+      }
+
       return reply;
     })
     .get('/articles/:id', { name: 'article' }, async (req, reply) => {
       const { id } = req.params;
-      const article = await app.objection.models.article.query().findById(id);
+      const article = await app.db.models.Article.findByPk(id);
       reply.render('articles/show', { article });
-      return reply;
-    })
-    .delete('/articles/:id', async (req, reply) => {
-      const { id } = req.params;
-      await app.objection.models.article.query().deleteById(id);
-      req.flash('info', i18next.t('flash.articles.delete.success'));
-      reply.redirect(app.reverse('articles'));
       return reply;
     })
     .get('/articles/:id/edit', { name: 'editArticle' }, async (req, reply) => {
@@ -36,24 +50,20 @@ export default (app) => {
       reply.redirect(app.reverse('articles'));
       return reply;
     })
-    .get('/articles/new', { name: 'newArticle' }, (req, reply) => {
-      const article = new app.objection.models.article();
-      reply.render('articles/new', { article });
-    })
-    .post('/articles', async (req, reply) => {
-      const article = new app.objection.models.article();
-      article.$set(req.body.data);
+    .delete('/articles/:id', async (req, reply) => {
+      const { id } = req.params;
+      const article = await app.db.models.Article.findByPk(id);
 
       try {
-        const validArticle = await app.objection.models.article.fromJson(req.body.data);
-        await app.objection.models.article.query().insert(validArticle);
-        req.flash('info', i18next.t('flash.articles.create.success'));
-        reply.redirect(app.reverse('articles'));
-      } catch ({ data }) {
-        req.flash('error', i18next.t('flash.articles.create.error'));
-        reply.render('articles/new', { article, errors: data });
+        if (article) {
+          await article.destroy();
+        }
+        req.flash('info', i18next.t('views.article.delete.success'));
+      } catch ({ errors }) {
+        req.flash('error', i18next.t('views.article.delete.error'));
       }
 
+      reply.redirect(app.reverse('articles'));
       return reply;
     });
 };

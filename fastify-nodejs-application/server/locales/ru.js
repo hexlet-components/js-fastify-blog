@@ -2,39 +2,58 @@
 
 export default {
   translation: {
-    appName: 'Fastify Шаблон',
+    appName: 'Простой блог',
     flash: {
       session: {
         create: {
-          success: 'Вы залогинены',
-          error: 'Неправильный емейл или пароль',
+          success: 'Вы вошли в систему',
+          error: 'Неправильный email или пароль',
         },
         delete: {
-          success: 'Вы разлогинены',
+          success: 'Вы вышли из системы',
         },
       },
-      users: {
-        create: {
-          error: 'Не удалось зарегистрировать',
-          success: 'Пользователь успешно зарегистрирован',
-        },
-      },
-      authError: 'Доступ запрещён! Пожалуйста, авторизируйтесь.',
     },
     layouts: {
       application: {
-        users: 'Пользователи',
-        signIn: 'Вход',
-        signUp: 'Регистрация',
-        signOut: 'Выход',
+        articles: 'Статьи',
+      },
+      actions: {
+        view: 'Просмотр',
+        edit: 'Редактировать',
+        delete: 'Удалить',
       },
     },
     views: {
+      article: {
+        content: {
+          placeholder: 'Введите содержимое статьи',
+        },
+      },
+      articles: {
+        index: {
+          header: 'Статьи',
+          id: 'ID',
+          title: 'Заголовок',
+          createdAt: 'Создано',
+          actions: 'Действия',
+          new: 'Новая статья',
+          delete_confirmation: 'Подтверждение удаления',
+        },
+        edit: {
+          header: 'Редактировать статью',
+          submit: 'Обновить',
+        },
+        new: {
+          header: 'New Article',
+          submit: 'Create'
+        }
+      },
       welcome: {
         index: {
           hello: 'Привет от Хекслета!',
-          description: 'Практические курсы по программированию',
-          more: 'Узнать Больше',
+          description: 'Школа онлайн программирования',
+          more: 'Узнать больше',
         },
       },
     },

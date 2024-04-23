@@ -23,12 +23,19 @@ import en from './locales/en.js';
 import addRoutes from './routes/index.js';
 import getHelpers from './helpers/index.js';
 import * as knexConfig from '../knexfile.js';
-import models from './models/index.js';
+import db from './db/models/index.cjs'
 
 const __dirname = fileURLToPath(path.dirname(import.meta.url));
 
 const mode = process.env.NODE_ENV || 'development';
 const isDevelopment = mode === 'development';
+
+const setUpDb = (app) => {
+  app.decorate('db', db.sequelize);
+  app.addHook('onClose', async () => {
+    await db.sequelize.close();
+  });
+};
 
 const setUpViews = (app) => {
   const helpers = getHelpers(app);
@@ -84,18 +91,13 @@ const registerPlugins = async (app) => {
   await app.register(fastifyReverseRoutes);
   await app.register(fastifyFormbody, { parser: qs.parse });
   await app.register(fastifySecureSession, {
-    secret: process.env.SESSION_KEY,
+    secret: '4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df2187400586a4121c54c53b85',
     cookie: {
       path: '/',
     },
   });
   await app.register(fastifyFlash);
-
   await app.register(fastifyMethodOverride);
-  await app.register(fastifyObjectionjs, {
-    knexConfig: knexConfig[mode],
-    models,
-  });
 };
 
 export const options = {
@@ -107,6 +109,7 @@ export default async (app, _options) => {
   await registerPlugins(app);
 
   await setupLocalization();
+  setUpDb(app);
   setUpViews(app);
   setUpStaticAssets(app);
   addRoutes(app);

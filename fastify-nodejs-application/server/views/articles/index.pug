@@ -1,15 +1,15 @@
 extends ../layouts/application.pug
 
 block header
-  = t('views.articles.header')
+  = t('views.articles.index.header')
 block content
-  a.btn.btn-primary(href=route('newArticle'))= t('views.articles.new')
+  a.btn.btn-primary(href=route('newArticle'))= t('views.articles.index.new')
   table.table.table-striped
     thead
       tr
-        th= t('views.articles.id')
-        th= t('views.articles.title')
-        th= t('views.articles.createdAt')
+        th= t('views.articles.index.id')
+        th= t('views.articles.index.title')
+        th= t('views.articles.index.createdAt')
         th= t('actions')
 
     tbody
@@ -19,12 +19,12 @@ block content
           td= article.title
           td= formatDate(article.createdAt)
           td
-            a.me-2(href=`/articles/${article.id}`)= t('views.articles.view')
-            a.me-2(href=`/articles/${article.id}/edit`)= t('views.articles.edit')
+            a.me-2(href=`/articles/${article.id}`)= t('layouts.actions.view')
+            a.me-2(href=`/articles/${article.id}/edit`)= t('layouts.actions.edit')
             //- FIXME Expected "id" to be a string
             a.me-2.text-danger(
               href=`/articles/${article.id}`
               data-method="delete"
-              data-confirm=t('views.articles.delete_confirmation')
+              data-confirm=t('views.articles.index.delete_confirmation')
               rel="nofollow"
-            )= t('views.articles.delete')
+            )= t('layouts.actions.delete')
