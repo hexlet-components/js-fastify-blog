@@ -23,6 +23,18 @@ export default {
     },
     views: {
       article: {
+        create: {
+          success: "Success",
+          error: "Error"
+        },
+        edit: {
+          success: "Success",
+          error: "Error"
+        },
+        delete: {
+          success: "Success",
+          error: "Error"
+        },
         content: {
           placeholder: 'Enter article content',
         },
