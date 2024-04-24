@@ -1,27 +1,41 @@
+// @ts-check
+
+import {
+  describe, beforeAll, expect, test, afterAll
+} from '@jest/globals';
+
 import fastify from 'fastify';
-import buildApp from '../app.js';
+import init from '../server/plugin.js';
+
 
 // TODO: сейчас каждый тест оставляет после себя артефакты в БД
 // попытатся использовать транзакции или перед каждым тестом очищать БД
-describe('server test', () => {
+
+describe('requests', () => {
   let app;
 
   beforeAll(async () => {
-    app = fastify();
-    await buildApp(app);
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
-
-  test('responds with success on request /', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/',
+    app = fastify({
+      exposeHeadRoutes: false,
+      logger: { target: 'pino-pretty' },
     });
+    await init(app);
+  });
 
-    expect(response.statusCode).toBe(200);
+  test('GET 200', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: app.reverse('root'),
+    });
+    expect(res.statusCode).toBe(200);
+  });
+
+  test('GET 404', async () => {
+    const res = await app.inject({
+      method: 'GET',
+      url: '/wrong-path',
+    });
+    expect(res.statusCode).toBe(404);
   });
 
   test('show articles - GET /articles', async () => {
@@ -44,7 +58,7 @@ describe('server test', () => {
 
   test('create article - POST /articles', async () => {
     const newArticleData = {
-      name: 'Article 1',
+      title: 'Article 1',
       content: 'Article 1 content',
     };
 
@@ -64,7 +78,7 @@ describe('server test', () => {
 
   test('edit article - GET /articles/:id', async () => {
     const newArticleData = {
-      name: 'Article 2',
+      title: 'Article 2',
       content: 'Article 2 content',
     };
 
@@ -88,7 +102,7 @@ describe('server test', () => {
 
   test('update article - PATCH /articles/:id', async () => {
     const newArticleData = {
-      name: 'Article 3',
+      title: 'Article 3',
       content: 'Article 3 content',
     };
 
@@ -103,7 +117,7 @@ describe('server test', () => {
     const newArticle = await app.db.models.Article.findOne({ where: newArticleData });
 
     const updatedArticleData = {
-      name: 'Article updated',
+      title: 'Article updated',
       content: 'Article updated content',
     };
 
@@ -125,7 +139,7 @@ describe('server test', () => {
 
   test('delete article - DELETE /articles/:id', async () => {
     const newArticleData = {
-      name: 'Article 4',
+      title: 'Article 4',
       content: 'Article 4 content',
     };
 
@@ -152,7 +166,7 @@ describe('server test', () => {
 
   test('show article - GET /articles/:id', async () => {
     const newArticleData = {
-      name: 'Article 5',
+      title: 'Article 5',
       content: 'Article 5 content',
     };
 
@@ -172,5 +186,9 @@ describe('server test', () => {
     });
 
     expect(response2.statusCode).toBe(200);
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 });

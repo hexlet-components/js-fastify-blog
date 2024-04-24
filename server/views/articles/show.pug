@@ -1,0 +1,7 @@
+extends ../layouts/application.pug
+
+block header
+  = article.title
+
+block content
+  +article(article.content)

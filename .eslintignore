@@ -1,1 +1,4 @@
-migrations/
+node_modules
+dist
+db
+server/migrations

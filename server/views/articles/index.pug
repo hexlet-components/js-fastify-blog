@@ -1,0 +1,30 @@
+extends ../layouts/application.pug
+
+block header
+  = t('views.articles.index.header')
+block content
+  a.btn.btn-primary(href=route('newArticle'))= t('views.articles.index.new')
+  table.table.table-striped
+    thead
+      tr
+        th= t('views.articles.index.id')
+        th= t('views.articles.index.title')
+        th= t('views.articles.index.createdAt')
+        th= t('actions')
+
+    tbody
+      each article in articles
+        tr
+          td= article.id
+          td= article.title
+          td= formatDate(article.createdAt)
+          td
+            a.me-2(href=route('article', { id: article.id }))= t('layouts.actions.view')
+            a.me-2(href=route('editArticle', { id: article.id }))= t('layouts.actions.edit')
+            //- FIXME Expected "id" to be a string
+            a.me-2.text-danger(
+              href=route('article', { id: article.id })
+              data-method="delete"
+              data-confirm=t('views.articles.index.delete_confirmation')
+              rel="nofollow"
+            )= t('layouts.actions.delete')
