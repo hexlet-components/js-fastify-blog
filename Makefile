@@ -31,4 +31,4 @@ lint-fix:
 	npx eslint --fix .
 
 test:
-	npm test -s
+	NODE_ENV=test npm test -s
