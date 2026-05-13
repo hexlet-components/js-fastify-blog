@@ -51,8 +51,12 @@ export default {
         },
         edit: {
           header: 'Edit article',
-          submit: 'Update'
-        }
+          submit: 'Update',
+        },
+        new: {
+          header: 'New article',
+          submit: 'Create',
+        },
       },
 
       welcome: {

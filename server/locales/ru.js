@@ -26,6 +26,18 @@ export default {
     },
     views: {
       article: {
+        create: {
+          success: 'Статья создана',
+          error: 'Не удалось создать статью',
+        },
+        edit: {
+          success: 'Статья обновлена',
+          error: 'Не удалось обновить статью',
+        },
+        delete: {
+          success: 'Статья удалена',
+          error: 'Не удалось удалить статью',
+        },
         content: {
           placeholder: 'Введите содержимое статьи',
         },
@@ -45,9 +57,9 @@ export default {
           submit: 'Обновить',
         },
         new: {
-          header: 'New Article',
-          submit: 'Create'
-        }
+          header: 'Новая статья',
+          submit: 'Создать',
+        },
       },
       welcome: {
         index: {
