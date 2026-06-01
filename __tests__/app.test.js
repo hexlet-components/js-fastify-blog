@@ -1,12 +1,8 @@
 // @ts-check
 
-import {
-  describe, beforeAll, expect, test, afterAll
-} from '@jest/globals';
-
 import fastify from 'fastify';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import init from '../server/plugin.js';
-
 
 // TODO: сейчас каждый тест оставляет после себя артефакты в БД
 // попытатся использовать транзакции или перед каждым тестом очищать БД
@@ -72,7 +68,9 @@ describe('requests', () => {
 
     expect(response.statusCode).toBe(302);
 
-    const article = await app.db.models.Article.findOne({ where: newArticleData });
+    const article = await app.db.models.Article.findOne({
+      where: newArticleData,
+    });
     expect(article).not.toBeNull();
   });
 
@@ -90,7 +88,9 @@ describe('requests', () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({ where: newArticleData });
+    const newArticle = await app.db.models.Article.findOne({
+      where: newArticleData,
+    });
 
     const response2 = await app.inject({
       method: 'GET',
@@ -114,7 +114,9 @@ describe('requests', () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({ where: newArticleData });
+    const newArticle = await app.db.models.Article.findOne({
+      where: newArticleData,
+    });
 
     const updatedArticleData = {
       title: 'Article updated',
@@ -131,9 +133,13 @@ describe('requests', () => {
 
     expect(response2.statusCode).toBe(302);
 
-    const updatedArticle = await app.db.models.Article.findOne({ where: updatedArticleData });
+    const updatedArticle = await app.db.models.Article.findOne({
+      where: updatedArticleData,
+    });
     expect(updatedArticle).not.toBeNull();
-    const article = await app.db.models.Article.findOne({ where: newArticleData });
+    const article = await app.db.models.Article.findOne({
+      where: newArticleData,
+    });
     expect(article).toBeNull();
   });
 
@@ -151,7 +157,9 @@ describe('requests', () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({ where: newArticleData });
+    const newArticle = await app.db.models.Article.findOne({
+      where: newArticleData,
+    });
 
     const response2 = await app.inject({
       method: 'DELETE',
@@ -160,7 +168,9 @@ describe('requests', () => {
 
     expect(response2.statusCode).toBe(302);
 
-    const updatedArticle = await app.db.models.Article.findOne({ where: newArticleData });
+    const updatedArticle = await app.db.models.Article.findOne({
+      where: newArticleData,
+    });
     expect(updatedArticle).toBeNull();
   });
 
@@ -178,7 +188,9 @@ describe('requests', () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({ where: newArticleData });
+    const newArticle = await app.db.models.Article.findOne({
+      where: newArticleData,
+    });
 
     const response2 = await app.inject({
       method: 'GET',

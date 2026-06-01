@@ -1,27 +1,26 @@
 // @ts-check
 
-import { fileURLToPath } from 'url';
-import path from 'path';
+import fastifyFlash from '@fastify/flash';
+import fastifyFormbody from '@fastify/formbody';
+import fastifySecureSession from '@fastify/secure-session';
+import fastifySensible from '@fastify/sensible';
 import fastifyStatic from '@fastify/static';
 // NOTE: не поддердивает fastify 4.x
 // import fastifyErrorPage from 'fastify-error-page';
 import fastifyView from '@fastify/view';
-import fastifyFormbody from '@fastify/formbody';
-import fastifySecureSession from '@fastify/secure-session';
-import fastifyFlash from '@fastify/flash';
-import fastifySensible from '@fastify/sensible';
-import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
 import fastifyMethodOverride from 'fastify-method-override';
-import qs from 'qs';
-import Pug from 'pug';
+import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
 import i18next from 'i18next';
-
-import ru from './locales/ru.js';
-import en from './locales/en.js';
-// @ts-ignore
-import addRoutes from './routes/index.js';
+import path from 'path';
+import Pug from 'pug';
+import qs from 'qs';
+import { fileURLToPath } from 'url';
+import db from './db/models/index.cjs';
 import getHelpers from './helpers/index.js';
-import db from './db/models/index.cjs'
+import en from './locales/en.js';
+import ru from './locales/ru.js';
+// @ts-expect-error
+import addRoutes from './routes/index.js';
 
 const __dirname = fileURLToPath(path.dirname(import.meta.url));
 
@@ -63,16 +62,15 @@ const setUpStaticAssets = (app) => {
 };
 
 const setupLocalization = async () => {
-  await i18next
-    .init({
-      lng: 'en',
-      fallbackLng: 'ru',
-      debug: isDevelopment,
-      resources: {
-        ru,
-        en,
-      },
-    });
+  await i18next.init({
+    lng: 'en',
+    fallbackLng: 'ru',
+    debug: isDevelopment,
+    resources: {
+      ru,
+      en,
+    },
+  });
 };
 
 const addHooks = (app) => {

@@ -25,10 +25,10 @@ start-frontend:
 	npx webpack --watch --progress
 
 lint:
-	npx eslint .
+	npx biome check .
 
 lint-fix:
-	npx eslint --fix .
+	npx biome check --write .
 
 test:
 	NODE_ENV=test npm test -s

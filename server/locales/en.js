@@ -8,8 +8,8 @@ export default {
         create: {
           error: 'Failed to create article',
           success: 'Article was created',
-        }
-      }
+        },
+      },
     },
     layouts: {
       application: {
@@ -24,16 +24,16 @@ export default {
     views: {
       article: {
         create: {
-          success: "Success",
-          error: "Error"
+          success: 'Success',
+          error: 'Error',
         },
         edit: {
-          success: "Success",
-          error: "Error"
+          success: 'Success',
+          error: 'Error',
         },
         delete: {
-          success: "Success",
-          error: "Error"
+          success: 'Success',
+          error: 'Error',
         },
         content: {
           placeholder: 'Enter article content',
