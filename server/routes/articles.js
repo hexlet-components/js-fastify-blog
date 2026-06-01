@@ -36,7 +36,7 @@ export default (app) => {
       return reply;
     })
     .get('/articles/:id/edit', { name: 'editArticle' }, async (req, reply) => {
-      const { id }= req.params;
+      const { id } = req.params;
       const article = await app.db.models.Article.findByPk(id);
       reply.render('articles/edit', { article });
       return reply;
