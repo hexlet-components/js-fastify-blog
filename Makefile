@@ -1,34 +1,35 @@
 setup: install db-migrate
 
 install:
-	npm install
+	pnpm install
 
 db-migrate:
-	npm run migrate
+	pnpm run migrate
 
 build:
-	npm run build
+	pnpm run build
 
 prepare-env:
 	cp -n .env.example .env
 
 start:
-	NODE_ENV=production npm run start
+	NODE_ENV=production pnpm run start
 
 dev:
-	npx concurrently "make start-frontend" "make start-backend"
+	pnpm exec concurrently "make start-frontend" "make start-backend"
 
 start-backend:
 	npm start -- --watch --verbose-watch --ignore-watch='node_modules .git .sqlite'
 
 start-frontend:
-	npx webpack --watch --progress
+	pnpm exec webpack --watch --progress
 
 lint:
-	npx biome check .
+	pnpm --silent run lint
+	pnpm --silent run format:check
 
 lint-fix:
-	npx biome check --write .
+	pnpm --silent run lint:fix
 
 test:
-	NODE_ENV=test npm test -s
+	NODE_ENV=test pnpm --silent test
