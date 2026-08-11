@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface) {
-    return queryInterface.bulkInsert('articles', [
+    return queryInterface.bulkInsert("articles", [
       {
-        title: 'Test1',
-        content: 'TestTestTest',
+        title: "Test1",
+        content: "TestTestTest",
         created_at: new Date(),
         updated_at: new Date(),
       },
@@ -14,7 +14,7 @@ module.exports = {
   },
 
   async down(queryInterface) {
-    await queryInterface.bulkDelete('articles', null, {});
+    await queryInterface.bulkDelete("articles", null, {});
     /**
      * Add commands to revert seed here.
      *

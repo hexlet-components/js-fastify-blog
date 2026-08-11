@@ -1,7 +1,7 @@
 // @ts-check
 
-import articles from './articles.js';
-import root from './root.js';
+import articles from "./articles.js";
+import root from "./root.js";
 
 const controllers = [root, articles];
 
