@@ -1,34 +1,49 @@
 // @ts-check
 
+import { eq } from "drizzle-orm";
 import i18next from "i18next";
+import { articles } from "../../db/schema.js";
+import { validateArticle } from "../validators/article.js";
 
 export default (app) => {
+  const findArticle = (id) =>
+    app.db
+      .select()
+      .from(articles)
+      .where(eq(articles.id, Number(id)))
+      .get();
+
   const updateArticle = async (req, reply) => {
     const { id } = req.params;
-    const article = await app.db.models.Article.findByPk(id);
-    Object.assign(article, req.body.data);
+    const article = findArticle(id);
+    const { data, errors } = validateArticle(req.body.data);
 
-    try {
-      await article.save();
-      req.flash("info", i18next.t("views.article.edit.success"));
-      reply.redirect(app.reverse("articles"));
-    } catch ({ errors }) {
+    if (errors) {
       req.flash("error", i18next.t("views.article.edit.error"));
       reply.code(422);
-      reply.render("articles/edit", { article, errors });
+      reply.render("articles/edit", { article: { ...article, ...req.body.data }, errors });
+      return reply;
     }
 
+    app.db
+      .update(articles)
+      .set({ ...data, updatedAt: new Date().toISOString() })
+      .where(eq(articles.id, Number(id)))
+      .run();
+
+    req.flash("info", i18next.t("views.article.edit.success"));
+    reply.redirect(app.reverse("articles"));
     return reply;
   };
 
   const destroyArticle = async (req, reply) => {
     const { id } = req.params;
-    const article = await app.db.models.Article.findByPk(id);
 
     try {
-      if (article) {
-        await article.destroy();
-      }
+      app.db
+        .delete(articles)
+        .where(eq(articles.id, Number(id)))
+        .run();
       req.flash("info", i18next.t("views.article.delete.success"));
     } catch (e) {
       console.log(e);
@@ -41,40 +56,33 @@ export default (app) => {
 
   app
     .get("/articles", { name: "articles" }, async (req, reply) => {
-      const articles = await app.db.models.Article.findAll();
-      reply.render("articles/index", { articles });
+      reply.render("articles/index", { articles: app.db.select().from(articles).all() });
       return reply;
     })
     .get("/articles/new", { name: "newArticle" }, (req, reply) => {
-      const article = app.db.models.Article.build();
-      reply.render("articles/new", { article });
+      reply.render("articles/new", { article: { title: "", content: "" } });
     })
     .post("/articles", async (req, reply) => {
-      const article = app.db.models.Article.build(req.body.data);
+      const { data, errors } = validateArticle(req.body.data);
 
-      try {
-        await article.save();
-        req.flash("info", i18next.t("views.article.create.success"));
-        reply.redirect(app.reverse("articles"));
-      } catch (e) {
+      if (errors) {
         req.flash("error", i18next.t("views.article.create.error"));
-        console.log(e);
         reply.code(422);
-        reply.render("articles/new", { article, errors: e.errors });
+        reply.render("articles/new", { article: req.body.data ?? {}, errors });
+        return reply;
       }
 
+      app.db.insert(articles).values(data).run();
+      req.flash("info", i18next.t("views.article.create.success"));
+      reply.redirect(app.reverse("articles"));
       return reply;
     })
     .get("/articles/:id", { name: "article" }, async (req, reply) => {
-      const { id } = req.params;
-      const article = await app.db.models.Article.findByPk(id);
-      reply.render("articles/show", { article });
+      reply.render("articles/show", { article: findArticle(req.params.id) });
       return reply;
     })
     .get("/articles/:id/edit", { name: "editArticle" }, async (req, reply) => {
-      const { id } = req.params;
-      const article = await app.db.models.Article.findByPk(id);
-      reply.render("articles/edit", { article });
+      reply.render("articles/edit", { article: findArticle(req.params.id) });
       return reply;
     })
     .patch("/articles/:id", updateArticle)

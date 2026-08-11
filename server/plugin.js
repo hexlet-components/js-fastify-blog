@@ -1,5 +1,6 @@
 // @ts-check
 
+import dbPlugin from "./plugins/db.js";
 import fastifyFlash from "@fastify/flash";
 import fastifyFormbody from "@fastify/formbody";
 import fastifySecureSession from "@fastify/secure-session";
@@ -14,7 +15,6 @@ import path from "path";
 import Pug from "pug";
 import qs from "qs";
 import { fileURLToPath } from "url";
-import db from "./db/models/index.cjs";
 import getHelpers from "./helpers/index.js";
 import en from "./locales/en.js";
 import ru from "./locales/ru.js";
@@ -25,13 +25,6 @@ const __dirname = fileURLToPath(path.dirname(import.meta.url));
 
 const mode = process.env.NODE_ENV || "development";
 const isDevelopment = mode === "development";
-
-const setUpDb = (app) => {
-  app.decorate("db", db.sequelize);
-  app.addHook("onClose", async () => {
-    await db.sequelize.close();
-  });
-};
 
 const setUpViews = (app) => {
   const helpers = getHelpers(app);
@@ -81,6 +74,7 @@ const addHooks = (app) => {
 };
 
 const registerPlugins = async (app) => {
+  await app.register(dbPlugin);
   await app.register(fastifySensible);
   // await app.register(fastifyErrorPage);
   await app.register(fastifyReverseRoutes);
@@ -103,7 +97,6 @@ export default async (app, _options) => {
   await registerPlugins(app);
 
   await setupLocalization();
-  setUpDb(app);
   setUpViews(app);
   setUpStaticAssets(app);
   addRoutes(app);
