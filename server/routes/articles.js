@@ -2,20 +2,26 @@
 
 import { eq } from "drizzle-orm";
 import i18next from "i18next";
-import { articles } from "../../db/schema.js";
+import { articles } from "../../db/schema/index.js";
 import { validateArticle } from "../validators/article.js";
 
 export default (app) => {
-  const findArticle = (id) =>
-    app.db
+  // Запросы пишутся в асинхронной форме, без .get()/.all()/.run(): те
+  // синхронные и существуют только у sqlite-драйвера, а на postgres дают
+  // «.all is not a function». Await работает у обоих диалектов.
+  const findArticle = async (id) => {
+    const [article] = await app.db
       .select()
       .from(articles)
       .where(eq(articles.id, Number(id)))
-      .get();
+      .limit(1);
+
+    return article ?? null;
+  };
 
   const updateArticle = async (req, reply) => {
     const { id } = req.params;
-    const article = findArticle(id);
+    const article = await findArticle(id);
     const { data, errors } = validateArticle(req.body.data);
 
     if (errors) {
@@ -25,11 +31,10 @@ export default (app) => {
       return reply;
     }
 
-    app.db
+    await app.db
       .update(articles)
       .set({ ...data, updatedAt: new Date().toISOString() })
-      .where(eq(articles.id, Number(id)))
-      .run();
+      .where(eq(articles.id, Number(id)));
 
     req.flash("info", i18next.t("views.article.edit.success"));
     reply.redirect(app.reverse("articles"));
@@ -40,10 +45,7 @@ export default (app) => {
     const { id } = req.params;
 
     try {
-      app.db
-        .delete(articles)
-        .where(eq(articles.id, Number(id)))
-        .run();
+      await app.db.delete(articles).where(eq(articles.id, Number(id)));
       req.flash("info", i18next.t("views.article.delete.success"));
     } catch (e) {
       console.log(e);
@@ -56,7 +58,7 @@ export default (app) => {
 
   app
     .get("/articles", { name: "articles" }, async (req, reply) => {
-      reply.render("articles/index", { articles: app.db.select().from(articles).all() });
+      reply.render("articles/index", { articles: await app.db.select().from(articles) });
       return reply;
     })
     .get("/articles/new", { name: "newArticle" }, (req, reply) => {
@@ -72,17 +74,17 @@ export default (app) => {
         return reply;
       }
 
-      app.db.insert(articles).values(data).run();
+      await app.db.insert(articles).values(data);
       req.flash("info", i18next.t("views.article.create.success"));
       reply.redirect(app.reverse("articles"));
       return reply;
     })
     .get("/articles/:id", { name: "article" }, async (req, reply) => {
-      reply.render("articles/show", { article: findArticle(req.params.id) });
+      reply.render("articles/show", { article: await findArticle(req.params.id) });
       return reply;
     })
     .get("/articles/:id/edit", { name: "editArticle" }, async (req, reply) => {
-      reply.render("articles/edit", { article: findArticle(req.params.id) });
+      reply.render("articles/edit", { article: await findArticle(req.params.id) });
       return reply;
     })
     .patch("/articles/:id", updateArticle)

@@ -3,7 +3,7 @@
 import { and, eq } from "drizzle-orm";
 import fastify from "fastify";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { articles } from "../db/schema.js";
+import { articles } from "../db/schema/index.js";
 import init from "../server/plugin.js";
 
 // TODO: сейчас каждый тест оставляет после себя артефакты в БД
@@ -16,15 +16,21 @@ describe("requests", () => {
   // два маленьких хелпера вместо повторения select().from().where() в каждом
   // тесте. `?? null` сохраняет прежнее поведение: не найдено это null, а не
   // undefined, и проверки toBeNull() остаются осмысленными.
-  const findArticle = ({ title, content }) =>
-    app.db
+  const findArticle = async ({ title, content }) => {
+    const [article] = await app.db
       .select()
       .from(articles)
       .where(and(eq(articles.title, title), eq(articles.content, content)))
-      .get() ?? null;
+      .limit(1);
 
-  const findArticleById = (id) =>
-    app.db.select().from(articles).where(eq(articles.id, id)).get() ?? null;
+    return article ?? null;
+  };
+
+  const findArticleById = async (id) => {
+    const [article] = await app.db.select().from(articles).where(eq(articles.id, id)).limit(1);
+
+    return article ?? null;
+  };
 
   beforeAll(async () => {
     app = fastify({
@@ -84,7 +90,7 @@ describe("requests", () => {
 
     expect(response.statusCode).toBe(302);
 
-    const article = findArticle(newArticleData);
+    const article = await findArticle(newArticleData);
     expect(article).not.toBeNull();
   });
 
@@ -102,7 +108,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = findArticle(newArticleData);
+    const newArticle = await findArticle(newArticleData);
 
     const response2 = await app.inject({
       method: "GET",
@@ -126,7 +132,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = findArticle(newArticleData);
+    const newArticle = await findArticle(newArticleData);
 
     const updatedArticleData = {
       title: "Article updated",
@@ -143,9 +149,9 @@ describe("requests", () => {
 
     expect(response2.statusCode).toBe(302);
 
-    const updatedArticle = findArticle(updatedArticleData);
+    const updatedArticle = await findArticle(updatedArticleData);
     expect(updatedArticle).not.toBeNull();
-    const article = findArticle(newArticleData);
+    const article = await findArticle(newArticleData);
     expect(article).toBeNull();
   });
 
@@ -164,7 +170,7 @@ describe("requests", () => {
       payload: { data: articleData },
     });
 
-    const article = findArticle(articleData);
+    const article = await findArticle(articleData);
 
     const updatedData = {
       title: "Article via _method updated",
@@ -178,7 +184,7 @@ describe("requests", () => {
     });
 
     expect(response.statusCode).toBe(302);
-    expect(findArticle(updatedData)).not.toBeNull();
+    expect(await findArticle(updatedData)).not.toBeNull();
   });
 
   test("delete article - POST with _method=delete", async () => {
@@ -193,7 +199,7 @@ describe("requests", () => {
       payload: { data: articleData },
     });
 
-    const article = findArticle(articleData);
+    const article = await findArticle(articleData);
 
     const response = await app.inject({
       method: "POST",
@@ -202,7 +208,7 @@ describe("requests", () => {
     });
 
     expect(response.statusCode).toBe(302);
-    expect(findArticleById(article.id)).toBeNull();
+    expect(await findArticleById(article.id)).toBeNull();
   });
 
   test("POST without _method is rejected", async () => {
@@ -229,7 +235,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = findArticle(newArticleData);
+    const newArticle = await findArticle(newArticleData);
 
     const response2 = await app.inject({
       method: "DELETE",
@@ -238,7 +244,7 @@ describe("requests", () => {
 
     expect(response2.statusCode).toBe(302);
 
-    const updatedArticle = findArticle(newArticleData);
+    const updatedArticle = await findArticle(newArticleData);
     expect(updatedArticle).toBeNull();
   });
 
@@ -256,7 +262,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = findArticle(newArticleData);
+    const newArticle = await findArticle(newArticleData);
 
     const response2 = await app.inject({
       method: "GET",
