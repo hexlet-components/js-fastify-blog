@@ -1,4 +1,9 @@
-- const getEntityName = (entity) => _.camelCase(entity.constructor.name)
+//- Раньше имя сущности выводилось из entity.constructor.name: модели Sequelize
+//- давали Article. После перехода на drizzle записи это обычные объекты, у
+//- которых constructor.name равен Object, и ключи переводов уехали бы в
+//- views.object.*. Приложение оперирует одной сущностью, поэтому имя задано
+//- явно, а не угадывается по классу.
+- const getEntityName = () => 'article'
 - const getInputName = (property) => `data[${property}]`
 - const getInputId = (property) => `data_${property}`
 - const getError = (errors, propertyName) => errors.find((error) => error.path === propertyName)

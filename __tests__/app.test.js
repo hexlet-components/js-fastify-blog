@@ -1,7 +1,9 @@
 // @ts-check
 
+import { and, eq } from "drizzle-orm";
 import fastify from "fastify";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { articles } from "../db/schema.js";
 import init from "../server/plugin.js";
 
 // TODO: сейчас каждый тест оставляет после себя артефакты в БД
@@ -9,6 +11,20 @@ import init from "../server/plugin.js";
 
 describe("requests", () => {
   let app;
+
+  // Sequelize отдавал модель с findOne/findByPk. У drizzle это запросы, поэтому
+  // два маленьких хелпера вместо повторения select().from().where() в каждом
+  // тесте. `?? null` сохраняет прежнее поведение: не найдено это null, а не
+  // undefined, и проверки toBeNull() остаются осмысленными.
+  const findArticle = ({ title, content }) =>
+    app.db
+      .select()
+      .from(articles)
+      .where(and(eq(articles.title, title), eq(articles.content, content)))
+      .get() ?? null;
+
+  const findArticleById = (id) =>
+    app.db.select().from(articles).where(eq(articles.id, id)).get() ?? null;
 
   beforeAll(async () => {
     app = fastify({
@@ -68,9 +84,7 @@ describe("requests", () => {
 
     expect(response.statusCode).toBe(302);
 
-    const article = await app.db.models.Article.findOne({
-      where: newArticleData,
-    });
+    const article = findArticle(newArticleData);
     expect(article).not.toBeNull();
   });
 
@@ -88,9 +102,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({
-      where: newArticleData,
-    });
+    const newArticle = findArticle(newArticleData);
 
     const response2 = await app.inject({
       method: "GET",
@@ -114,9 +126,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({
-      where: newArticleData,
-    });
+    const newArticle = findArticle(newArticleData);
 
     const updatedArticleData = {
       title: "Article updated",
@@ -133,13 +143,9 @@ describe("requests", () => {
 
     expect(response2.statusCode).toBe(302);
 
-    const updatedArticle = await app.db.models.Article.findOne({
-      where: updatedArticleData,
-    });
+    const updatedArticle = findArticle(updatedArticleData);
     expect(updatedArticle).not.toBeNull();
-    const article = await app.db.models.Article.findOne({
-      where: newArticleData,
-    });
+    const article = findArticle(newArticleData);
     expect(article).toBeNull();
   });
 
@@ -158,7 +164,7 @@ describe("requests", () => {
       payload: { data: articleData },
     });
 
-    const article = await app.db.models.Article.findOne({ where: articleData });
+    const article = findArticle(articleData);
 
     const updatedData = {
       title: "Article via _method updated",
@@ -172,7 +178,7 @@ describe("requests", () => {
     });
 
     expect(response.statusCode).toBe(302);
-    expect(await app.db.models.Article.findOne({ where: updatedData })).not.toBeNull();
+    expect(findArticle(updatedData)).not.toBeNull();
   });
 
   test("delete article - POST with _method=delete", async () => {
@@ -187,7 +193,7 @@ describe("requests", () => {
       payload: { data: articleData },
     });
 
-    const article = await app.db.models.Article.findOne({ where: articleData });
+    const article = findArticle(articleData);
 
     const response = await app.inject({
       method: "POST",
@@ -196,7 +202,7 @@ describe("requests", () => {
     });
 
     expect(response.statusCode).toBe(302);
-    expect(await app.db.models.Article.findByPk(article.id)).toBeNull();
+    expect(findArticleById(article.id)).toBeNull();
   });
 
   test("POST without _method is rejected", async () => {
@@ -223,9 +229,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({
-      where: newArticleData,
-    });
+    const newArticle = findArticle(newArticleData);
 
     const response2 = await app.inject({
       method: "DELETE",
@@ -234,9 +238,7 @@ describe("requests", () => {
 
     expect(response2.statusCode).toBe(302);
 
-    const updatedArticle = await app.db.models.Article.findOne({
-      where: newArticleData,
-    });
+    const updatedArticle = findArticle(newArticleData);
     expect(updatedArticle).toBeNull();
   });
 
@@ -254,9 +256,7 @@ describe("requests", () => {
       },
     });
 
-    const newArticle = await app.db.models.Article.findOne({
-      where: newArticleData,
-    });
+    const newArticle = findArticle(newArticleData);
 
     const response2 = await app.inject({
       method: "GET",
