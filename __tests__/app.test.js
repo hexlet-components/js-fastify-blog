@@ -143,6 +143,72 @@ describe('requests', () => {
     expect(article).toBeNull();
   });
 
+  // Формы отправляют PATCH и DELETE как POST со скрытым полем `_method`,
+  // потому что HTML умеет только GET и POST. Прямые PATCH и DELETE проверяются
+  // выше, здесь проверяется именно подмена.
+  test('update article - POST with _method=patch', async () => {
+    const articleData = {
+      title: 'Article via _method',
+      content: 'Article via _method content',
+    };
+
+    await app.inject({
+      method: 'POST',
+      url: '/articles',
+      payload: { data: articleData },
+    });
+
+    const article = await app.db.models.Article.findOne({ where: articleData });
+
+    const updatedData = {
+      title: 'Article via _method updated',
+      content: 'Article via _method updated content',
+    };
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/articles/${article.id}`,
+      payload: { _method: 'patch', data: updatedData },
+    });
+
+    expect(response.statusCode).toBe(302);
+    expect(await app.db.models.Article.findOne({ where: updatedData })).not.toBeNull();
+  });
+
+  test('delete article - POST with _method=delete', async () => {
+    const articleData = {
+      title: 'Article to delete via _method',
+      content: 'Article to delete via _method content',
+    };
+
+    await app.inject({
+      method: 'POST',
+      url: '/articles',
+      payload: { data: articleData },
+    });
+
+    const article = await app.db.models.Article.findOne({ where: articleData });
+
+    const response = await app.inject({
+      method: 'POST',
+      url: `/articles/${article.id}`,
+      payload: { _method: 'delete' },
+    });
+
+    expect(response.statusCode).toBe(302);
+    expect(await app.db.models.Article.findByPk(article.id)).toBeNull();
+  });
+
+  test('POST without _method is rejected', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/articles/1',
+      payload: {},
+    });
+
+    expect(response.statusCode).toBe(405);
+  });
+
   test('delete article - DELETE /articles/:id', async () => {
     const newArticleData = {
       title: 'Article 4',

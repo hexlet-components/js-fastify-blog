@@ -8,7 +8,6 @@ import fastifyStatic from '@fastify/static';
 // NOTE: не поддердивает fastify 4.x
 // import fastifyErrorPage from 'fastify-error-page';
 import fastifyView from '@fastify/view';
-import fastifyMethodOverride from 'fastify-method-override';
 import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
 import i18next from 'i18next';
 import path from 'path';
@@ -93,7 +92,6 @@ const registerPlugins = async (app) => {
     },
   });
   await app.register(fastifyFlash);
-  await app.register(fastifyMethodOverride);
 };
 
 export const options = {
