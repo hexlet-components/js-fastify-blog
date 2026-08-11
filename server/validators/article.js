@@ -1,7 +1,7 @@
 // @ts-check
 
 import { createInsertSchema } from "drizzle-zod";
-import { articles } from "../../db/schema.js";
+import { articles } from "../../db/schema/index.js";
 
 // Схема выводится из схемы таблицы, поэтому типы колонок и обязательность
 // полей не дублируются руками. Сверху добавлено только то, чего в таблице нет:

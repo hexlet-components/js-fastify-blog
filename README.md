@@ -4,8 +4,8 @@
 
 ## Requirement
 
-* NodeJS v20.6.1
-* Sqlite или PostgreSQL
+* NodeJS v26
+* Sqlite (по умолчанию) или PostgreSQL
 
 ## Commands
 
@@ -14,34 +14,23 @@ make install
 make dev
 ```
 
-## Run tests with Postgres
+## Database
 
-To run tests with Postgres, you need to edit *config/config.cjs* and under the `test` key comment out the use of SQLite and uncomment the environment variables
+The application runs on SQLite by default, so `make install && make dev` needs
+nothing else installed. Migrations are applied at startup.
 
-```js
-  // test: {
-  //   dialect: 'sqlite',
-  //   storage: './database.test.sqlite',
-  // },
-  test: {
-    dialect: 'postgres',
-    database: process.env.DATABASE_NAME,
-    username: process.env.DATABASE_USERNAME,
-    password: process.env.DATABASE_PASSWORD,
-    port: process.env.DATABASE_PORT,
-    host: process.env.DATABASE_HOST,
-  },
-```
-
-Specify environment variables manually or prepare a *.env* file with the command
+To use PostgreSQL, set `DATABASE_CLIENT=postgres` and point the app at the
+database, either with `DATABASE_URL` or with the separate variables below.
 
 ```bash
-make prepare-env
+make prepare-env    # creates .env from .env.example
 ```
 
-In it specify the data to connect to the database
-
 ```dotenv
+DATABASE_CLIENT=postgres
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
+
+# instead of DATABASE_URL the parts can be given separately
 DATABASE_NAME=postgres
 DATABASE_USERNAME=postgres
 DATABASE_PASSWORD=postgres
@@ -49,11 +38,23 @@ DATABASE_PORT=5432
 DATABASE_HOST=localhost
 ```
 
+The same variable selects the dialect for tests and for migration generation:
+
+```bash
+make test                                   # SQLite, in-memory
+DATABASE_CLIENT=postgres make test          # PostgreSQL
+
+pnpm run db:generate                        # SQLite migrations
+DATABASE_CLIENT=postgres pnpm run db:generate   # PostgreSQL migrations
+```
+
+Each dialect keeps its own schema (`db/schema/sqlite.js`, `db/schema/pg.js`) and
+its own migrations (`db/migrations-sqlite`, `db/migrations-pg`). Drizzle cannot
+describe both with one definition: column types come from different packages.
+
 ## Running an application with Postgres (production)
 
-Export environment variables to work with the database or prepare a *.env* file with variables
-
-Run
+Set `DATABASE_CLIENT=postgres` and the connection variables, then run
 
 ```bash
 make build # build assets

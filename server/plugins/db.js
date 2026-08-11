@@ -1,36 +1,67 @@
 // @ts-check
 
 import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import { migrate } from "drizzle-orm/better-sqlite3/migrator";
+import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3";
+import { migrate as migrateSqlite } from "drizzle-orm/better-sqlite3/migrator";
+import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
+import { migrate as migratePg } from "drizzle-orm/node-postgres/migrator";
 import fp from "fastify-plugin";
-import * as schema from "../../db/schema.js";
+import pg from "pg";
+import schema, { isPostgres } from "../../db/schema/index.js";
 
-// Путь к базе. Раньше три окружения описывал config.cjs для Sequelize.
+// Диалект выбирается переменной DATABASE_CLIENT. По умолчанию sqlite: так блог
+// запускается одной командой, без поднятой базы. PostgreSQL нужен для деплоя,
+// его требует урок production_basics_course/550-database.
 //
-// В тестах база живёт в памяти и создаётся заново на каждый прогон. Прежняя
-// схема с файлом database.test.sqlite требовала отдельного шага pretest,
-// который откатывал и накатывал миграции; без него строки от предыдущих
-// прогонов накапливались, и тесты начинали находить чужие статьи вместо своих.
-const getDatabasePath = () => {
-  if (process.env.DATABASE_PATH) {
-    return process.env.DATABASE_PATH;
-  }
+// Раньше три окружения описывал config.cjs для Sequelize, который умел оба
+// диалекта из коробки. У drizzle схемы диалектов несовместимы, поэтому их две
+// (db/schema/pg.js и db/schema/sqlite.js), и миграции у них тоже свои.
 
-  return process.env.NODE_ENV === "test" ? ":memory:" : "./database.sqlite";
+const buildPostgres = () => {
+  const connectionString =
+    process.env.DATABASE_URL ??
+    `postgres://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}` +
+      `@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_NAME}`;
+
+  const pool = new pg.Pool({ connectionString });
+  const db = drizzlePg(pool, { schema });
+
+  return {
+    db,
+    migrate: () => migratePg(db, { migrationsFolder: "./db/migrations-pg" }),
+    close: () => pool.end(),
+  };
+};
+
+const buildSqlite = () => {
+  // В тестах база живёт в памяти и создаётся заново на каждый прогон. Файловая
+  // тестовая база требовала отдельного шага, откатывающего и накатывающего
+  // миграции; без него строки прошлых прогонов копились, и тесты начинали
+  // находить чужие статьи.
+  const path =
+    process.env.DATABASE_PATH ??
+    (process.env.NODE_ENV === "test" ? ":memory:" : "./database.sqlite");
+
+  const sqlite = new Database(path);
+  const db = drizzleSqlite(sqlite, { schema });
+
+  return {
+    db,
+    migrate: () => migrateSqlite(db, { migrationsFolder: "./db/migrations-sqlite" }),
+    close: async () => sqlite.close(),
+  };
 };
 
 export default fp(async (app) => {
-  const sqlite = new Database(getDatabasePath());
-  const db = drizzle(sqlite, { schema });
+  const { db, migrate, close } = isPostgres ? buildPostgres() : buildSqlite();
 
   // Миграции применяются на старте. У Sequelize это был отдельный шаг
   // `sequelize db:migrate` в prestart и pretest, и он разъезжался с кодом.
-  migrate(db, { migrationsFolder: "./db/migrations" });
+  await migrate();
 
   app.decorate("db", db);
   app.decorate("schema", schema);
   app.addHook("onClose", async () => {
-    sqlite.close();
+    await close();
   });
 });
