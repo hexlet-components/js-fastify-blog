@@ -2,6 +2,16 @@
 
 [![Main](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml/badge.svg)](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml)
 
+## Зачем это нужно
+
+Блог на [Fastify](https://fastify.dev/): статьи, формы, серверный рендеринг
+шаблонов, база через ORM, локализация.
+
+Служит примером приложения, которое больше одного файла с маршрутами, и
+используется курсами про докер, Vagrant и деплой как то, что нужно упаковать и
+развернуть. Отсюда и две базы: sqlite по умолчанию, чтобы запускалось без
+внешних сервисов, и PostgreSQL для деплоя.
+
 ## Requirement
 
 * NodeJS v26
