@@ -1,6 +1,7 @@
 // @ts-check
 
 import dbPlugin from "./plugins/db.js";
+import reversePlugin from "./plugins/reverse.js";
 import fastifyFlash from "@fastify/flash";
 import fastifyFormbody from "@fastify/formbody";
 import fastifySecureSession from "@fastify/secure-session";
@@ -9,7 +10,6 @@ import fastifyStatic from "@fastify/static";
 // NOTE: не поддердивает fastify 4.x
 // import fastifyErrorPage from 'fastify-error-page';
 import fastifyView from "@fastify/view";
-import { plugin as fastifyReverseRoutes } from "fastify-reverse-routes";
 import i18next from "i18next";
 import path from "path";
 import Pug from "pug";
@@ -77,7 +77,7 @@ const registerPlugins = async (app) => {
   await app.register(dbPlugin);
   await app.register(fastifySensible);
   // await app.register(fastifyErrorPage);
-  await app.register(fastifyReverseRoutes);
+  await app.register(reversePlugin);
   await app.register(fastifyFormbody, { parser: qs.parse });
   await app.register(fastifySecureSession, {
     secret: "4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df2187400586a4121c54c53b85",

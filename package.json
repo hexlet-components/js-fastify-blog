@@ -44,7 +44,6 @@
     "fastify-cli": "^8.0.0",
     "fastify-error-page": "^4.0.0",
     "fastify-plugin": "^6.0.0",
-    "fastify-reverse-routes": "^3.0.0",
     "i18next": "^26.3.6",
     "jquery": "^4.0.0",
     "jstransformer-markdown-it": "^3.0.0",
