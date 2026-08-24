@@ -12,7 +12,7 @@ import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
 import i18next from "i18next";
 import path from "path";
-import Pug from "pug";
+import { Eta } from "eta";
 import qs from "qs";
 import { fileURLToPath } from "url";
 import getHelpers from "./helpers/index.js";
@@ -30,7 +30,7 @@ const setUpViews = (app) => {
   const helpers = getHelpers(app);
   app.register(fastifyView, {
     engine: {
-      pug: Pug,
+      eta: new Eta(),
     },
     includeViewExtension: true,
     defaultContext: {

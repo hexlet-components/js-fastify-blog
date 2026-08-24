@@ -1,0 +1,22 @@
+<%
+  const errors = it.errors ?? [];
+  const errorText = errors
+    .filter((error) => error.path === it.propertyName)
+    .map(({ message }) => message)
+    .join('. ');
+  const inputId = `data_${it.propertyName}`;
+  const fieldClass = 'w-full rounded border border-gray-300 px-3 py-2';
+%>
+<div class="mb-4">
+  <label class="mb-1 block text-sm font-medium" for="<%= inputId %>"><%= it.t(`views.article.${it.propertyName}.label`) %></label>
+  <textarea
+    id="<%= inputId %>"
+    name="data[<%= it.propertyName %>]"
+    class="<%= fieldClass %><%= errorText ? ' border-red-500' : '' %>"
+    placeholder="<%= it.placeholder ?? '' %>"
+    rows="<%= it.rows ?? 3 %>"
+  ><%= (it.entity && it.entity[it.propertyName]) || '' %></textarea>
+  <% if (errorText) { %>
+  <p class="mt-1 text-sm text-red-600"><%= errorText %></p>
+  <% } %>
+</div>

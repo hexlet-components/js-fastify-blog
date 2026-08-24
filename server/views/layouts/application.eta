@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Hexlet Fastify Blog</title>
+    <link href="<%= it.assetPath('main.css') %>" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body class="flex min-h-screen flex-col bg-white text-gray-900">
+    <nav class="border-b border-gray-200 bg-gray-50">
+      <div class="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
+        <a class="text-lg font-semibold" href="<%= it.route('root') %>"><%= it.t('appName') %></a>
+        <a class="text-sm text-gray-600" href="<%= it.route('articles') %>"><%= it.t('layouts.application.articles') %></a>
+      </div>
+    </nav>
+    <div class="mx-auto w-full max-w-5xl flex-1 px-4">
+      <% Object.entries(it.reply.flash() || {}).forEach(([type, messages]) => { %>
+        <% messages.forEach((message) => { %>
+        <div class="mb-4 rounded border px-4 py-3 <%= it.getAlertClass(type) %>"><%= message %></div>
+        <% }) %>
+      <% }) %>
+
+      <h1 class="my-6 text-3xl font-bold"><%= it.header ?? '' %></h1>
+      <%~ it.body %>
+    </div>
+
+    <footer class="mt-10 border-t border-gray-200">
+      <div class="mx-auto max-w-5xl px-4 py-6">
+        <a class="text-sm text-gray-600" target="_blank" href="https://ru.hexlet.io">Hexlet</a>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+<form action="<%= it.action %>" method="post">
+  <input name="_method" type="hidden" value="<%= it.method %>">
+  <input
+    type="submit"
+    class="<%= it.class %>"
+    value="<%= it.value %>"
+    <% if (it.onclick) { %>onclick="<%= it.onclick %>"<% } %>
+  >
+</form>

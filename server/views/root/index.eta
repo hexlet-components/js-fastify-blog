@@ -1,0 +1,6 @@
+<% layout("../layouts/application") %>
+<div class="rounded border border-gray-200 bg-gray-50 p-10">
+  <p class="text-4xl font-bold"><%= it.t('views.welcome.index.hello') %></p>
+  <p class="mt-4 text-xl text-gray-600"><%= it.t('views.welcome.index.description') %></p>
+  <a class="mt-6 inline-block rounded bg-blue-600 px-5 py-3 text-white" href="https://hexlet.io"><%= it.t('views.welcome.index.more') %></a>
+</div>

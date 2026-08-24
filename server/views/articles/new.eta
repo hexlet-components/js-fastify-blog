@@ -1,0 +1,12 @@
+<% layout("../layouts/application", { header: it.t('views.articles.new.header') }) %>
+<form class="mb-6" action="<%= it.route('articles') %>" method="post">
+  <%~ include("../mixins/input", { entity: it.article, propertyName: 'title', errors: it.errors, type: 'text' }) %>
+  <%~ include("../mixins/textarea", {
+    entity: it.article,
+    propertyName: 'content',
+    errors: it.errors,
+    placeholder: it.t('views.article.content.placeholder'),
+    rows: 10,
+  }) %>
+  <%~ include("../mixins/submit", { value: it.t('views.articles.new.submit') }) %>
+</form>

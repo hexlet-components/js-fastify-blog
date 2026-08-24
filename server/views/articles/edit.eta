@@ -1,0 +1,13 @@
+<% layout("../layouts/application", { header: it.t('views.articles.edit.header') }) %>
+<form class="mb-6" action="<%= it.route('article', { id: it.article.id }) %>" method="post">
+  <%~ include("../mixins/input", { entity: it.article, propertyName: 'title', errors: it.errors, type: 'text' }) %>
+  <%~ include("../mixins/textarea", {
+    entity: it.article,
+    propertyName: 'content',
+    errors: it.errors,
+    placeholder: it.t('views.article.content.placeholder'),
+    rows: 10,
+  }) %>
+  <input name="_method" type="hidden" value="patch">
+  <%~ include("../mixins/submit", { value: it.t('views.articles.edit.submit') }) %>
+</form>

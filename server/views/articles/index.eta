@@ -1,0 +1,35 @@
+<% layout("../layouts/application", { header: it.t('views.articles.index.header') }) %>
+<a class="inline-block rounded bg-blue-600 px-4 py-2 text-white" href="<%= it.route('newArticle') %>"><%= it.t('views.articles.index.new') %></a>
+<table class="mt-6 w-full text-left">
+  <thead class="border-b border-gray-300">
+    <tr>
+      <th class="py-2"><%= it.t('views.articles.index.id') %></th>
+      <th class="py-2"><%= it.t('views.articles.index.title') %></th>
+      <th class="py-2"><%= it.t('views.articles.index.createdAt') %></th>
+      <th class="py-2"><%= it.t('views.articles.index.actions') %></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% it.articles.forEach((article) => { %>
+    <tr class="border-b border-gray-200">
+      <td class="py-2"><%= article.id %></td>
+      <td class="py-2"><%= article.title %></td>
+      <td class="py-2"><%= it.formatDate(article.createdAt) %></td>
+      <td class="py-2">
+        <div class="flex items-center gap-4">
+          <a class="text-blue-600" href="<%= it.route('article', { id: article.id }) %>"><%= it.t('layouts.actions.view') %></a>
+          <a class="text-blue-600" href="<%= it.route('editArticle', { id: article.id }) %>"><%= it.t('layouts.actions.edit') %></a>
+          <%~ include("../mixins/buttonTo", {
+            action: it.route('article', { id: article.id }),
+            method: 'delete',
+            value: it.t('layouts.actions.delete'),
+            class: 'cursor-pointer text-red-600',
+            onclick: `return confirm('${it.t('views.articles.index.delete_confirmation')}')`,
+          }) %>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

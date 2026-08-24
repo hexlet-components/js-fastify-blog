@@ -1,0 +1,2 @@
+<% layout("../layouts/application", { header: it.article.title }) %>
+<%~ include("../mixins/article", { content: it.article.content }) %>
