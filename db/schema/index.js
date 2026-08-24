@@ -1,15 +1,18 @@
-// Точка входа для схемы: отдаёт таблицы того диалекта, который выбран
-// окружением. Благодаря этому маршруты и валидатор импортируют `articles`
-// одинаково и про диалект ничего не знают.
+import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+
+// Диалект один, PostgreSQL: локально его роль играет PGlite (тот же postgres,
+// собранный в WebAssembly), на деплое настоящий сервер. Раньше диалектов было
+// два, и схему приходилось держать в двух файлах: типы колонок drizzle берёт
+// из разных пакетов, и таблица из sqlite-core в pg-core не подходит.
 //
-// Выбор делается на загрузке модуля, а не на каждом запросе: DATABASE_CLIENT
-// в течение процесса не меняется.
-import * as pg from "./pg.js";
-import * as sqlite from "./sqlite.js";
+// Колонки в snake_case: так их создала первая миграция, и существующая база
+// должна остаться читаемой.
+export const articles = pgTable("articles", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at", { mode: "string" }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { mode: "string" }).notNull().defaultNow(),
+});
 
-export const isPostgres = process.env.DATABASE_CLIENT === "postgres";
-
-const schema = isPostgres ? pg : sqlite;
-
-export const { articles } = schema;
-export default schema;
+export default { articles };

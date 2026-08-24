@@ -35,7 +35,11 @@ export default {
           success: "Success",
           error: "Error",
         },
+        title: {
+          label: "Title",
+        },
         content: {
+          label: "Content",
           placeholder: "Enter article content",
         },
       },

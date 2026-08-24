@@ -1,14 +1,12 @@
-# Сборка отделена от финального образа: better-sqlite3 компилируется из
-# исходников, для этого нужны python3 и g++, и тащить их в рантайм незачем.
-FROM node:26-slim AS builder
+FROM node:26-slim
 
 # corepack из образов Node 26 убран, поэтому pnpm ставится напрямую. Версия
 # берётся из поля packageManager, чтобы образ и разработка совпадали.
-RUN npm install -g pnpm@11.20.0
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      python3 make g++ \
-  && rm -rf /var/lib/apt/lists/*
+#
+# make нужен в рантайме: команды приложения живут в Makefile.
+RUN apt-get update && apt-get install -y --no-install-recommends make \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g pnpm@11.20.0
 
 WORKDIR /app
 
@@ -19,16 +17,6 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 RUN pnpm run build
-
-FROM node:26-slim
-
-# make нужен в рантайме: команды приложения живут в Makefile.
-RUN apt-get update && apt-get install -y --no-install-recommends make \
-  && rm -rf /var/lib/apt/lists/* \
-  && npm install -g pnpm@11.20.0
-
-WORKDIR /app
-COPY --from=builder /app /app
 
 # Порт не задаётся: fastify-cli по умолчанию слушает 3000, и на этот порт
 # рассчитан урок docker_basics_course/600-network, где контейнер запускают

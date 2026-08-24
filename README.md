@@ -1,6 +1,6 @@
 # JS Fastify Blog
 
-[![Main](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml/badge.svg)](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/main.yml)
+[![Node CI](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/nodeci.yml/badge.svg)](https://github.com/hexlet-components/js-fastify-blog/actions/workflows/nodeci.yml)
 
 ## Зачем это нужно
 
@@ -9,13 +9,14 @@
 
 Служит примером приложения, которое больше одного файла с маршрутами, и
 используется курсами про докер, Vagrant и деплой как то, что нужно упаковать и
-развернуть. Отсюда и две базы: sqlite по умолчанию, чтобы запускалось без
-внешних сервисов, и PostgreSQL для деплоя.
+развернуть. База одна, PostgreSQL: локально её роль играет PGlite, тот же
+postgres, собранный в WebAssembly и живущий внутри процесса, а на деплое
+указывается настоящий сервер.
 
 ## Requirement
 
-* NodeJS v26
-* Sqlite (по умолчанию) или PostgreSQL
+- NodeJS v26
+- PostgreSQL — только для деплоя, локально не нужен
 
 ## Commands
 
@@ -26,18 +27,18 @@ make dev
 
 ## Database
 
-The application runs on SQLite by default, so `make install && make dev` needs
-nothing else installed. Migrations are applied at startup.
+The application runs on PGlite by default, so `make install && make dev` needs
+nothing else installed. The database lives in the `database/` directory,
+migrations are applied at startup.
 
-To use PostgreSQL, set `DATABASE_CLIENT=postgres` and point the app at the
-database, either with `DATABASE_URL` or with the separate variables below.
+To use a PostgreSQL server, point the app at it, either with `DATABASE_URL` or
+with the separate variables below.
 
 ```bash
 make prepare-env    # creates .env from .env.example
 ```
 
 ```dotenv
-DATABASE_CLIENT=postgres
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/postgres
 
 # instead of DATABASE_URL the parts can be given separately
@@ -48,23 +49,17 @@ DATABASE_PORT=5432
 DATABASE_HOST=localhost
 ```
 
-The same variable selects the dialect for tests and for migration generation:
+The dialect is the same either way, so schema (`db/schema/index.js`) and
+migrations (`db/migrations`) are single.
 
 ```bash
-make test                                   # SQLite, in-memory
-DATABASE_CLIENT=postgres make test          # PostgreSQL
-
-pnpm run db:generate                        # SQLite migrations
-DATABASE_CLIENT=postgres pnpm run db:generate   # PostgreSQL migrations
+make test               # PGlite, in memory
+pnpm run db:generate    # generate a migration from the schema
 ```
-
-Each dialect keeps its own schema (`db/schema/sqlite.js`, `db/schema/pg.js`) and
-its own migrations (`db/migrations-sqlite`, `db/migrations-pg`). Drizzle cannot
-describe both with one definition: column types come from different packages.
 
 ## Running an application with Postgres (production)
 
-Set `DATABASE_CLIENT=postgres` and the connection variables, then run
+Set the connection variables, then run
 
 ```bash
 make build # build assets

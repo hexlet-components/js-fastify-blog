@@ -38,7 +38,11 @@ export default {
           success: "Статья удалена",
           error: "Не удалось удалить статью",
         },
+        title: {
+          label: "Заголовок",
+        },
         content: {
+          label: "Содержимое",
           placeholder: "Введите содержимое статьи",
         },
       },

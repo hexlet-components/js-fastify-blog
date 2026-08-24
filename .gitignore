@@ -6,4 +6,4 @@ dist/
 tmp/
 temp/
 .env
-*.sqlite
+database/

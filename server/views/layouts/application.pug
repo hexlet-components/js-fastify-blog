@@ -4,30 +4,23 @@ include ../mixins/article.pug
 doctype html
 html(lang="en")
   head
-    title Hexlet Fastify Boilerplate
-    script(src=assetPath('main.js'))
+    title Hexlet Fastify Blog
     link(href=assetPath('main.css') rel="stylesheet")
-    meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
-  body.d-flex.flex-column.min-vh-100
-    nav.navbar.navbar-expand-lg.navbar-light.bg-light.mb-3
-      .container-fluid
-        a.navbar-brand(href=route('root'))= t('appName')
-        button.navbar-toggler(data-bs-toggle="collapse" data-bs-target="#navbarToggleExternalContent")
-          span.navbar-toggler-icon
-        .collapse.navbar-collapse(id="navbarToggleExternalContent")
-          .container-fluid
-            ul.navbar-nav.mr-auto
-              li.nav-item
-                a.nav-link(href=route('articles'))= t('layouts.application.articles')
-    .container.wrapper.flex-grow-1
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+  body.flex.min-h-screen.flex-col.bg-white.text-gray-900
+    nav.border-b.border-gray-200.bg-gray-50
+      .mx-auto.flex.max-w-5xl.items-center.gap-6.px-4.py-3
+        a.text-lg.font-semibold(href=route('root'))= t('appName')
+        a.text-sm.text-gray-600(href=route('articles'))= t('layouts.application.articles')
+    .mx-auto.w-full.max-w-5xl.flex-1.px-4
       each messages, type in reply.flash() || []
         each message in messages
-          div.alert(class=`alert-${getAlertClass(type)}`)= message
+          div(class=`mb-4 rounded border px-4 py-3 ${getAlertClass(type)}`)= message
 
-      h1.my-4
+      h1.my-6.text-3xl.font-bold
         block header
       block content
 
-    footer
-      .container.my-5.pt-4.border-top
-        a(target="_blank" href="https://ru.hexlet.io") Hexlet
+    footer.mt-10.border-t.border-gray-200
+      .mx-auto.max-w-5xl.px-4.py-6
+        a.text-sm.text-gray-600(target="_blank" href="https://ru.hexlet.io") Hexlet

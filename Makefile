@@ -1,10 +1,7 @@
-setup: install db-migrate
+setup: install build
 
 install:
 	pnpm install
-
-db-migrate:
-	pnpm run migrate
 
 build:
 	pnpm run build
@@ -19,10 +16,10 @@ dev:
 	pnpm exec concurrently "make start-frontend" "make start-backend"
 
 start-backend:
-	npm start -- --watch --verbose-watch --ignore-watch='node_modules .git .sqlite'
+	pnpm run start --watch --verbose-watch --ignore-watch='node_modules .git dist database'
 
 start-frontend:
-	pnpm exec webpack --watch --progress
+	pnpm exec vite build --watch
 
 lint:
 	pnpm --silent run lint

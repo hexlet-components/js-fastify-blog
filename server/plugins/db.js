@@ -1,62 +1,77 @@
 // @ts-check
 
-import Database from "better-sqlite3";
-import { drizzle as drizzleSqlite } from "drizzle-orm/better-sqlite3";
-import { migrate as migrateSqlite } from "drizzle-orm/better-sqlite3/migrator";
+import { PGlite } from "@electric-sql/pglite";
 import { drizzle as drizzlePg } from "drizzle-orm/node-postgres";
 import { migrate as migratePg } from "drizzle-orm/node-postgres/migrator";
+import { drizzle as drizzlePglite } from "drizzle-orm/pglite";
+import { migrate as migratePglite } from "drizzle-orm/pglite/migrator";
 import fp from "fastify-plugin";
 import pg from "pg";
-import schema, { isPostgres } from "../../db/schema/index.js";
+import schema from "../../db/schema/index.js";
 
-// Диалект выбирается переменной DATABASE_CLIENT. По умолчанию sqlite: так блог
-// запускается одной командой, без поднятой базы. PostgreSQL нужен для деплоя,
-// его требует урок production_basics_course/550-database.
+const migrationsFolder = "./db/migrations";
+
+// База одна, PostgreSQL, и подключение выбирается по окружению. Задан адрес
+// сервера (DATABASE_URL или DATABASE_HOST) — идём туда, этого требует урок
+// production_basics_course/550-database. Не задан — база поднимается внутри
+// процесса через PGlite, тот же postgres в WebAssembly.
 //
-// Раньше три окружения описывал config.cjs для Sequelize, который умел оба
-// диалекта из коробки. У drizzle схемы диалектов несовместимы, поэтому их две
-// (db/schema/pg.js и db/schema/sqlite.js), и миграции у них тоже свои.
+// Так блог запускается одной командой и при этом говорит с той же СУБД, что на
+// деплое. Раньше вторым диалектом был sqlite, и за него платили двумя схемами,
+// двумя наборами миграций и сборкой нативного модуля better-sqlite3 из
+// исходников, для которой в образ ставились python3 и g++.
+const getConnectionString = () => {
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL;
+  }
 
-const buildPostgres = () => {
-  const connectionString =
-    process.env.DATABASE_URL ??
+  if (!process.env.DATABASE_HOST) {
+    return null;
+  }
+
+  const port = process.env.DATABASE_PORT ?? 5432;
+
+  return (
     `postgres://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}` +
-      `@${process.env.DATABASE_HOST}:${process.env.DATABASE_PORT}/${process.env.DATABASE_NAME}`;
+    `@${process.env.DATABASE_HOST}:${port}/${process.env.DATABASE_NAME}`
+  );
+};
 
+const buildPostgres = (connectionString) => {
   const pool = new pg.Pool({ connectionString });
   const db = drizzlePg(pool, { schema });
 
   return {
     db,
-    migrate: () => migratePg(db, { migrationsFolder: "./db/migrations-pg" }),
+    migrate: () => migratePg(db, { migrationsFolder }),
     close: () => pool.end(),
   };
 };
 
-const buildSqlite = () => {
+const buildPglite = () => {
   // В тестах база живёт в памяти и создаётся заново на каждый прогон. Файловая
   // тестовая база требовала отдельного шага, откатывающего и накатывающего
   // миграции; без него строки прошлых прогонов копились, и тесты начинали
   // находить чужие статьи.
   const path =
-    process.env.DATABASE_PATH ??
-    (process.env.NODE_ENV === "test" ? ":memory:" : "./database.sqlite");
+    process.env.DATABASE_PATH ?? (process.env.NODE_ENV === "test" ? undefined : "./database");
 
-  const sqlite = new Database(path);
-  const db = drizzleSqlite(sqlite, { schema });
+  const client = new PGlite(path);
+  const db = drizzlePglite(client, { schema });
 
   return {
     db,
-    migrate: () => migrateSqlite(db, { migrationsFolder: "./db/migrations-sqlite" }),
-    close: async () => sqlite.close(),
+    migrate: () => migratePglite(db, { migrationsFolder }),
+    close: () => client.close(),
   };
 };
 
 export default fp(async (app) => {
-  const { db, migrate, close } = isPostgres ? buildPostgres() : buildSqlite();
+  const connectionString = getConnectionString();
+  const { db, migrate, close } = connectionString ? buildPostgres(connectionString) : buildPglite();
 
-  // Миграции применяются на старте. У Sequelize это был отдельный шаг
-  // `sequelize db:migrate` в prestart и pretest, и он разъезжался с кодом.
+  // Миграции применяются на старте. Отдельным шагом они разъезжались с кодом:
+  // приложение уже требовало колонку, которую забыли накатить.
   await migrate();
 
   app.decorate("db", db);

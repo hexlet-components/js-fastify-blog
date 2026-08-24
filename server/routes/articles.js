@@ -6,9 +6,6 @@ import { articles } from "../../db/schema/index.js";
 import { validateArticle } from "../validators/article.js";
 
 export default (app) => {
-  // Запросы пишутся в асинхронной форме, без .get()/.all()/.run(): те
-  // синхронные и существуют только у sqlite-драйвера, а на postgres дают
-  // «.all is not a function». Await работает у обоих диалектов.
   const findArticle = async (id) => {
     const [article] = await app.db
       .select()
