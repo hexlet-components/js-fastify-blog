@@ -35,6 +35,7 @@
     "@fastify/sensible": "^6.0.5",
     "@fastify/static": "^10.1.3",
     "@fastify/view": "^12.0.0",
+    "@hexlet/fastify-method-override": "git+https://github.com/hexlet-components/fastify-method-override.git",
     "drizzle-orm": "^0.45.2",
     "drizzle-zod": "^0.8.3",
     "eta": "^4.6.0",

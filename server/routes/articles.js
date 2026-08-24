@@ -84,31 +84,9 @@ export default (app) => {
       reply.render("articles/edit", { article: await findArticle(req.params.id) });
       return reply;
     })
-    .patch("/articles/:id", updateArticle)
-    .delete("/articles/:id", destroyArticle)
     // HTML-форма умеет только GET и POST, поэтому PATCH и DELETE приходят
-    // POST-запросом со скрытым полем `_method`.
-    //
-    // Раньше его разбирал пакет fastify-method-override. Он заброшен с 2023
-    // года и с fastify 5 роняет приложение на старте: «plugin being registered
-    // mixes async and callback styles».
-    //
-    // Замена сделана явной регистрацией маршрута, а не хуком: маршрутизация в
-    // fastify происходит раньше хуков, поэтому подменить метод в onRequest
-    // нельзя. Маршрутов таких два, и здесь видно, куда уходит POST.
-    .post("/articles/:id", async (req, reply) => {
-      const method = String(req.body?._method ?? "").toLowerCase();
-
-      if (method === "patch") {
-        return updateArticle(req, reply);
-      }
-
-      if (method === "delete") {
-        return destroyArticle(req, reply);
-      }
-
-      // Ответ обязан быть отправлен: с одним лишь reply.code() запрос повисает
-      // до таймаута, а не отвечает 405.
-      return reply.code(405).send({ error: "Method Not Allowed" });
-    });
+    // POST-запросом со скрытым полем `_method`. Разбирает его плагин
+    // @hexlet/fastify-method-override, подключённый в plugin.js.
+    .patch("/articles/:id", updateArticle)
+    .delete("/articles/:id", destroyArticle);
 };

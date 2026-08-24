@@ -4,6 +4,7 @@ import dbPlugin from "./plugins/db.js";
 import reversePlugin from "./plugins/reverse.js";
 import fastifyFlash from "@fastify/flash";
 import fastifyFormbody from "@fastify/formbody";
+import fastifyMethodOverride from "@hexlet/fastify-method-override";
 import fastifySecureSession from "@fastify/secure-session";
 import fastifySensible from "@fastify/sensible";
 import fastifyStatic from "@fastify/static";
@@ -79,6 +80,7 @@ const registerPlugins = async (app) => {
   // await app.register(fastifyErrorPage);
   await app.register(reversePlugin);
   await app.register(fastifyFormbody, { parser: qs.parse });
+  await app.register(fastifyMethodOverride);
   await app.register(fastifySecureSession, {
     secret: "4fe91796c30bd989d95b62dc46c7c3ba0b6aa2df2187400586a4121c54c53b85",
     cookie: {

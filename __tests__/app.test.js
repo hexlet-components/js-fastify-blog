@@ -211,14 +211,18 @@ describe("requests", () => {
     expect(await findArticleById(article.id)).toBeNull();
   });
 
-  test("POST without _method is rejected", async () => {
+  // POST-маршрута на этом адресе нет: там объявлены PATCH и DELETE, а POST
+  // доходит до них только через `_method`. Без него отвечает «не найдено», а не
+  // «метод не разрешён»: раньше 405 отдавал разбор `_method`, написанный руками
+  // в роутере, теперь его делает @hexlet/fastify-method-override.
+  test("POST without _method is not found", async () => {
     const response = await app.inject({
       method: "POST",
       url: "/articles/1",
       payload: {},
     });
 
-    expect(response.statusCode).toBe(405);
+    expect(response.statusCode).toBe(404);
   });
 
   test("delete article - DELETE /articles/:id", async () => {
