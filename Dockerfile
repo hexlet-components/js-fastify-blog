@@ -1,12 +1,10 @@
-FROM node:26-slim
+# Сборка отделена от финального образа: vite, tailwind, vitest и drizzle-kit
+# нужны, чтобы собрать ассеты, а приложению в рантайме нет.
+FROM node:26-slim AS builder
 
 # corepack из образов Node 26 убран, поэтому pnpm ставится напрямую. Версия
 # берётся из поля packageManager, чтобы образ и разработка совпадали.
-#
-# make нужен в рантайме: команды приложения живут в Makefile.
-RUN apt-get update && apt-get install -y --no-install-recommends make \
-  && rm -rf /var/lib/apt/lists/* \
-  && npm install -g pnpm@11.20.0
+RUN npm install -g pnpm@11.20.0
 
 WORKDIR /app
 
@@ -18,6 +16,26 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
 
+# Дерево обрезается здесь же, а не в финальном образе: тот тогда копирует
+# готовый прод-набор и не ходит в реестр второй раз.
+RUN pnpm prune --prod
+
+FROM node:26-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY package.json ./
+COPY server ./server
+COPY db ./db
+
+# Приложение запускается нодой напрямую, без pnpm и без Makefile: в финальном
+# образе живёт одна команда, а пакетный менеджер тянул бы за собой и себя, и
+# проверку состояния node_modules. Обрезанное дерево эту проверку не проходит
+# (pnpm-lock.yaml здесь нет), и pnpm молча уходил ставить зависимости заново,
+# после чего контейнер падал на «Ignored build scripts».
+#
 # Порт не задаётся: fastify-cli по умолчанию слушает 3000, и на этот порт
 # рассчитан урок docker_basics_course/600-network, где контейнер запускают
 # как `docker run -p 8080:3000`.
@@ -28,4 +46,4 @@ RUN pnpm run build
 # Флаг -o обязателен тоже: без него fastify-cli не читает экспорт `options` из
 # плагина и регистрирует его дважды, падая с «Route with name root already
 # registered».
-CMD ["pnpm", "exec", "fastify", "start", "-a", "0.0.0.0", "-l", "info", "-P", "-o", "server/plugin.js"]
+CMD ["node", "node_modules/fastify-cli/cli.js", "start", "-a", "0.0.0.0", "-l", "info", "-P", "-o", "server/plugin.js"]
