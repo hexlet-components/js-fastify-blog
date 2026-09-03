@@ -4,14 +4,9 @@
 
 ## Зачем это нужно
 
-Блог на [Fastify](https://fastify.dev/): статьи, формы, серверный рендеринг
-шаблонов, база через ORM, локализация.
+Блог на [Fastify](https://fastify.dev/): статьи, формы, серверный рендеринг шаблонов, база через ORM, локализация.
 
-Служит примером приложения, которое больше одного файла с маршрутами, и
-используется курсами про докер, Vagrant и деплой как то, что нужно упаковать и
-развернуть. База одна, PostgreSQL: локально её роль играет PGlite, тот же
-postgres, собранный в WebAssembly и живущий внутри процесса, а на деплое
-указывается настоящий сервер.
+Служит примером приложения, которое больше одного файла с маршрутами, и используется курсами про докер, Vagrant и деплой как то, что нужно упаковать и развернуть. База одна, PostgreSQL: локально её роль играет PGlite, тот же postgres, собранный в WebAssembly и живущий внутри процесса, а на деплое указывается настоящий сервер.
 
 ## Requirement
 
@@ -27,12 +22,9 @@ make dev
 
 ## Database
 
-The application runs on PGlite by default, so `make install && make dev` needs
-nothing else installed. The database lives in the `database/` directory,
-migrations are applied at startup.
+The application runs on PGlite by default, so `make install && make dev` needs nothing else installed. The database lives in the `database/` directory, migrations are applied at startup.
 
-To use a PostgreSQL server, point the app at it, either with `DATABASE_URL` or
-with the separate variables below.
+To use a PostgreSQL server, point the app at it, either with `DATABASE_URL` or with the separate variables below.
 
 ```bash
 make prepare-env    # creates .env from .env.example
@@ -49,8 +41,7 @@ DATABASE_PORT=5432
 DATABASE_HOST=localhost
 ```
 
-The dialect is the same either way, so schema (`db/schema/index.js`) and
-migrations (`db/migrations`) are single.
+The dialect is the same either way, so schema (`db/schema/index.js`) and migrations (`db/migrations`) are single.
 
 ```bash
 make test               # PGlite, in memory
