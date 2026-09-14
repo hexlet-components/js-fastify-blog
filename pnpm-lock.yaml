@@ -31,7 +31,7 @@ importers:
         version: 12.0.0
       '@hexlet/fastify-method-override':
         specifier: git+https://github.com/hexlet-components/fastify-method-override.git
-        version: https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/2fa6ea76c3c1f7ec78dcb35d7addcefc3d294923(fastify@5.12.1)
+        version: https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/59efc0ebf7045e7b4e10c1eb037413dfb96e7ab9(fastify@5.12.1)
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@electric-sql/pglite@0.5.8)(pg@8.23.0)
@@ -606,8 +606,8 @@ packages:
   '@fastify/view@12.0.0':
     resolution: {integrity: sha512-Prcoim4yTwG6vPnIyGrWViDx6FFnchV0GQWeBgAgywlL1JflGhTLDhIsyd7EkOreYHyqALqxnmhhJhD4NrJTWw==}
 
-  '@hexlet/fastify-method-override@https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/2fa6ea76c3c1f7ec78dcb35d7addcefc3d294923':
-    resolution: {gitHosted: true, integrity: sha512-0dGd4/x5ZNINOm3T4gINml6KkXDObeU/mZEE+w8UKueRcUoVu+0cGQ5UabcCKEqPMnY81HgMmU0ogd0iYCOAVw==, tarball: https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/2fa6ea76c3c1f7ec78dcb35d7addcefc3d294923}
+  '@hexlet/fastify-method-override@https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/59efc0ebf7045e7b4e10c1eb037413dfb96e7ab9':
+    resolution: {gitHosted: true, integrity: sha512-Z82HAFYfCH7+tLSedTwJ3LLE+FBfNzyyfDS2VHj52kK8DeMNUAaqwlGG1m+/WdmksvATjtLrb4la4RNpr3Jt8w==, tarball: https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/59efc0ebf7045e7b4e10c1eb037413dfb96e7ab9}
     version: 2.0.0
     engines: {node: '>=22'}
     peerDependencies:
@@ -2690,7 +2690,7 @@ snapshots:
       fastify-plugin: 5.1.0
       toad-cache: 3.7.4
 
-  '@hexlet/fastify-method-override@https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/2fa6ea76c3c1f7ec78dcb35d7addcefc3d294923(fastify@5.12.1)':
+  '@hexlet/fastify-method-override@https://codeload.github.com/hexlet-components/fastify-method-override/tar.gz/59efc0ebf7045e7b4e10c1eb037413dfb96e7ab9(fastify@5.12.1)':
     dependencies:
       fastify: 5.12.1
 
