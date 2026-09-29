@@ -4,7 +4,7 @@ FROM node:26-slim AS builder
 
 # corepack из образов Node 26 убран, поэтому pnpm ставится напрямую. Версия
 # берётся из поля packageManager, чтобы образ и разработка совпадали.
-RUN npm install -g pnpm@11.20.0
+RUN npm install -g pnpm@12.6.0
 
 WORKDIR /app
 
