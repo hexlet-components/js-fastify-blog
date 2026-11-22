@@ -1,0 +1,754 @@
+diff --git a/README.md b/README.md
+index 394f61e..96e3713 100644
+--- a/README.md
++++ b/README.md
+@@ -4,7 +4,7 @@
+ 
+ ## Зачем это нужно
+ 
+-Блог на [Fastify](https://fastify.dev/): статьи, формы, серверный рендеринг шаблонов, база через ORM, локализация.
++Блог на [Fastify](https://fastify.dev/): статьи, комментарии к ним, формы, серверный рендеринг шаблонов, база через ORM, локализация. Комментарии можно просматривать и добавлять без регистрации; имя автора необязательно.
+ 
+ Служит примером приложения, которое больше одного файла с маршрутами, и используется курсами про докер, Vagrant и деплой как то, что нужно упаковать и развернуть. База одна, PostgreSQL: локально её роль играет PGlite, тот же postgres, собранный в WebAssembly и живущий внутри процесса, а на деплое указывается настоящий сервер.
+ 
+diff --git a/__tests__/comments.test.js b/__tests__/comments.test.js
+new file mode 100644
+index 0000000..2936af9
+--- /dev/null
++++ b/__tests__/comments.test.js
+@@ -0,0 +1,142 @@
++// @ts-check
++
++import { eq } from "drizzle-orm";
++import fastify from "fastify";
++import { afterAll, beforeAll, describe, expect, test } from "vitest";
++import { articles } from "../db/schema/index.js";
++import { findComments } from "../server/helpers/comments.js";
++import init from "../server/plugin.js";
++
++describe("comments", () => {
++  let app;
++  let articleNumber = 0;
++
++  const createArticle = async () => {
++    articleNumber += 1;
++    const title = `Article ${articleNumber}`;
++    const response = await app.inject({
++      method: "POST",
++      url: "/articles",
++      payload: { data: { title, content: `${title} content` } },
++    });
++
++    expect(response.statusCode).toBe(302);
++
++    const [article] = await app.db
++      .select()
++      .from(articles)
++      .where(eq(articles.title, title))
++      .limit(1);
++
++    return article;
++  };
++
++  const addComment = async (articleId, data) =>
++    app.inject({
++      method: "POST",
++      url: `/articles/${articleId}/comments`,
++      payload: { data },
++    });
++
++  beforeAll(async () => {
++    app = fastify({
++      exposeHeadRoutes: false,
++      logger: { target: "pino-pretty" },
++    });
++    await init(app);
++  });
++
++  test("shows an empty state for an article without comments", async () => {
++    const article = await createArticle();
++    const response = await app.inject({
++      method: "GET",
++      url: app.reverse("article", { id: article.id }),
++    });
++
++    expect(response.statusCode).toBe(200);
++    expect(response.payload).toContain("No comments yet");
++    expect(response.payload).toContain("Add a comment");
++  });
++
++  test("adds a comment and shows it on the article page", async () => {
++    const article = await createArticle();
++    const response = await addComment(article.id, { author: "Alice", content: "First comment" });
++
++    expect(response.statusCode).toBe(302);
++    expect(response.headers.location).toBe(`/articles/${article.id}`);
++
++    const created = await findComments(app, article.id);
++    expect(created).toHaveLength(1);
++    expect(created[0]).toMatchObject({
++      articleId: article.id,
++      author: "Alice",
++      content: "First comment",
++    });
++
++    const page = await app.inject({
++      method: "GET",
++      url: `/articles/${article.id}`,
++    });
++
++    expect(page.payload).toContain("Alice");
++    expect(page.payload).toContain("First comment");
++  });
++
++  test("allows an empty author and renders the anonymous label", async () => {
++    const article = await createArticle();
++    const response = await addComment(article.id, { author: "   ", content: "No name here" });
++
++    expect(response.statusCode).toBe(302);
++
++    const created = await findComments(app, article.id);
++    expect(created).toHaveLength(1);
++    expect(created[0].author).toBe("");
++
++    const page = await app.inject({
++      method: "GET",
++      url: `/articles/${article.id}`,
++    });
++
++    expect(page.payload).toContain("Anonymous");
++    expect(page.payload).toContain("No name here");
++  });
++
++  test("rejects an empty comment content without saving it", async () => {
++    const article = await createArticle();
++    const response = await addComment(article.id, { author: "Bob", content: "   " });
++
++    expect(response.statusCode).toBe(422);
++    expect(response.payload).toContain("Bob");
++    expect(response.payload).toContain("Add a comment");
++    expect(await findComments(app, article.id)).toHaveLength(0);
++  });
++
++  test("returns 404 when the article does not exist", async () => {
++    const response = await addComment(999_999, { content: "Orphan comment" });
++
++    expect(response.statusCode).toBe(404);
++  });
++
++  test("shows comments only on their own article", async () => {
++    const first = await createArticle();
++    const second = await createArticle();
++
++    await addComment(first.id, { author: "Alice", content: "Only on the first article" });
++
++    const firstPage = await app.inject({
++      method: "GET",
++      url: `/articles/${first.id}`,
++    });
++    const secondPage = await app.inject({
++      method: "GET",
++      url: `/articles/${second.id}`,
++    });
++
++    expect(firstPage.payload).toContain("Only on the first article");
++    expect(secondPage.payload).not.toContain("Only on the first article");
++  });
++
++  afterAll(async () => {
++    await app.close();
++  });
++});
+diff --git a/db/migrations/0001_greedy_invisible_woman.sql b/db/migrations/0001_greedy_invisible_woman.sql
+new file mode 100644
+index 0000000..9ceef48
+--- /dev/null
++++ b/db/migrations/0001_greedy_invisible_woman.sql
+@@ -0,0 +1,9 @@
++CREATE TABLE "comments" (
++	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "comments_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
++	"article_id" integer NOT NULL,
++	"author" text NOT NULL,
++	"content" text NOT NULL,
++	"created_at" timestamp DEFAULT now() NOT NULL
++);
++--> statement-breakpoint
++ALTER TABLE "comments" ADD CONSTRAINT "comments_article_id_articles_id_fk" FOREIGN KEY ("article_id") REFERENCES "public"."articles"("id") ON DELETE cascade ON UPDATE no action;
+\ No newline at end of file
+diff --git a/db/migrations/meta/0001_snapshot.json b/db/migrations/meta/0001_snapshot.json
+new file mode 100644
+index 0000000..020bc6b
+--- /dev/null
++++ b/db/migrations/meta/0001_snapshot.json
+@@ -0,0 +1,144 @@
++{
++  "id": "1220866d-c421-4f45-baa0-52ff1daba85d",
++  "prevId": "b81dcc6c-94e2-4caa-bcd9-ba7356d5999d",
++  "version": "7",
++  "dialect": "postgresql",
++  "tables": {
++    "public.articles": {
++      "name": "articles",
++      "schema": "",
++      "columns": {
++        "id": {
++          "name": "id",
++          "type": "integer",
++          "primaryKey": true,
++          "notNull": true,
++          "identity": {
++            "type": "always",
++            "name": "articles_id_seq",
++            "schema": "public",
++            "increment": "1",
++            "startWith": "1",
++            "minValue": "1",
++            "maxValue": "2147483647",
++            "cache": "1",
++            "cycle": false
++          }
++        },
++        "title": {
++          "name": "title",
++          "type": "text",
++          "primaryKey": false,
++          "notNull": true
++        },
++        "content": {
++          "name": "content",
++          "type": "text",
++          "primaryKey": false,
++          "notNull": true
++        },
++        "created_at": {
++          "name": "created_at",
++          "type": "timestamp",
++          "primaryKey": false,
++          "notNull": true,
++          "default": "now()"
++        },
++        "updated_at": {
++          "name": "updated_at",
++          "type": "timestamp",
++          "primaryKey": false,
++          "notNull": true,
++          "default": "now()"
++        }
++      },
++      "indexes": {},
++      "foreignKeys": {},
++      "compositePrimaryKeys": {},
++      "uniqueConstraints": {},
++      "policies": {},
++      "checkConstraints": {},
++      "isRLSEnabled": false
++    },
++    "public.comments": {
++      "name": "comments",
++      "schema": "",
++      "columns": {
++        "id": {
++          "name": "id",
++          "type": "integer",
++          "primaryKey": true,
++          "notNull": true,
++          "identity": {
++            "type": "always",
++            "name": "comments_id_seq",
++            "schema": "public",
++            "increment": "1",
++            "startWith": "1",
++            "minValue": "1",
++            "maxValue": "2147483647",
++            "cache": "1",
++            "cycle": false
++          }
++        },
++        "article_id": {
++          "name": "article_id",
++          "type": "integer",
++          "primaryKey": false,
++          "notNull": true
++        },
++        "author": {
++          "name": "author",
++          "type": "text",
++          "primaryKey": false,
++          "notNull": true
++        },
++        "content": {
++          "name": "content",
++          "type": "text",
++          "primaryKey": false,
++          "notNull": true
++        },
++        "created_at": {
++          "name": "created_at",
++          "type": "timestamp",
++          "primaryKey": false,
++          "notNull": true,
++          "default": "now()"
++        }
++      },
++      "indexes": {},
++      "foreignKeys": {
++        "comments_article_id_articles_id_fk": {
++          "name": "comments_article_id_articles_id_fk",
++          "tableFrom": "comments",
++          "tableTo": "articles",
++          "columnsFrom": [
++            "article_id"
++          ],
++          "columnsTo": [
++            "id"
++          ],
++          "onDelete": "cascade",
++          "onUpdate": "no action"
++        }
++      },
++      "compositePrimaryKeys": {},
++      "uniqueConstraints": {},
++      "policies": {},
++      "checkConstraints": {},
++      "isRLSEnabled": false
++    }
++  },
++  "enums": {},
++  "schemas": {},
++  "sequences": {},
++  "roles": {},
++  "policies": {},
++  "views": {},
++  "_meta": {
++    "columns": {},
++    "schemas": {},
++    "tables": {}
++  }
++}
+\ No newline at end of file
+diff --git a/db/migrations/meta/_journal.json b/db/migrations/meta/_journal.json
+index 249c24b..79f8a12 100644
+--- a/db/migrations/meta/_journal.json
++++ b/db/migrations/meta/_journal.json
+@@ -8,6 +8,13 @@
+       "when": 1786483778767,
+       "tag": "0000_first_carlie_cooper",
+       "breakpoints": true
++    },
++    {
++      "idx": 1,
++      "version": "7",
++      "when": 1795341420342,
++      "tag": "0001_greedy_invisible_woman",
++      "breakpoints": true
+     }
+   ]
+ }
+\ No newline at end of file
+diff --git a/db/schema/index.js b/db/schema/index.js
+index 074a59f..399e234 100644
+--- a/db/schema/index.js
++++ b/db/schema/index.js
+@@ -15,4 +15,16 @@ export const articles = pgTable("articles", {
+   updatedAt: timestamp("updated_at", { mode: "string" }).notNull().defaultNow(),
+ });
+ 
+-export default { articles };
++// Автор необязателен: пустая строка означает «Аноним», но перевод подставляет
++// шаблон, чтобы английский интерфейс не показывал русское слово из базы.
++export const comments = pgTable("comments", {
++  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
++  articleId: integer("article_id")
++    .notNull()
++    .references(() => articles.id, { onDelete: "cascade" }),
++  author: text("author").notNull(),
++  content: text("content").notNull(),
++  createdAt: timestamp("created_at", { mode: "string" }).notNull().defaultNow(),
++});
++
++export default { articles, comments };
+diff --git a/server/helpers/articles.js b/server/helpers/articles.js
+new file mode 100644
+index 0000000..e535ead
+--- /dev/null
++++ b/server/helpers/articles.js
+@@ -0,0 +1,14 @@
++// @ts-check
++
++import { eq } from "drizzle-orm";
++import { articles } from "../../db/schema/index.js";
++
++export const findArticle = async (app, id) => {
++  const [article] = await app.db
++    .select()
++    .from(articles)
++    .where(eq(articles.id, Number(id)))
++    .limit(1);
++
++  return article ?? null;
++};
+diff --git a/server/helpers/comments.js b/server/helpers/comments.js
+new file mode 100644
+index 0000000..00f3467
+--- /dev/null
++++ b/server/helpers/comments.js
+@@ -0,0 +1,13 @@
++// @ts-check
++
++import { eq } from "drizzle-orm";
++import { comments } from "../../db/schema/index.js";
++
++// Порядок по id совпадает с порядком добавления: identity-колонка растёт
++// монотонно, а у created_at может совпасть значение внутри одной секунды.
++export const findComments = async (app, articleId) =>
++  app.db
++    .select()
++    .from(comments)
++    .where(eq(comments.articleId, Number(articleId)))
++    .orderBy(comments.id);
+diff --git a/server/locales/en.js b/server/locales/en.js
+index e3710c6..0e404dd 100644
+--- a/server/locales/en.js
++++ b/server/locales/en.js
+@@ -63,6 +63,27 @@ export default {
+         },
+       },
+ 
++      comments: {
++        header: "Comments",
++        empty: "No comments yet. Be the first to write one.",
++        anonymous: "Anonymous",
++        form: {
++          header: "Add a comment",
++        },
++        author: {
++          label: "Name (optional)",
++        },
++        content: {
++          label: "Comment",
++          placeholder: "Write a comment",
++        },
++        submit: "Add comment",
++        create: {
++          success: "Comment was added",
++          error: "Failed to add comment",
++        },
++      },
++
+       welcome: {
+         index: {
+           hello: "Hello from Hexlet!",
+diff --git a/server/locales/ru.js b/server/locales/ru.js
+index ba16745..935229e 100644
+--- a/server/locales/ru.js
++++ b/server/locales/ru.js
+@@ -65,6 +65,27 @@ export default {
+           submit: "Создать",
+         },
+       },
++      comments: {
++        header: "Комментарии",
++        empty: "Комментариев пока нет. Будьте первым.",
++        anonymous: "Аноним",
++        form: {
++          header: "Добавить комментарий",
++        },
++        author: {
++          label: "Имя (необязательно)",
++        },
++        content: {
++          label: "Комментарий",
++          placeholder: "Напишите комментарий",
++        },
++        submit: "Добавить",
++        create: {
++          success: "Комментарий добавлен",
++          error: "Не удалось добавить комментарий",
++        },
++      },
++
+       welcome: {
+         index: {
+           hello: "Привет от Хекслета!",
+diff --git a/server/routes/articles.js b/server/routes/articles.js
+index dea6f3c..d45024a 100644
+--- a/server/routes/articles.js
++++ b/server/routes/articles.js
+@@ -3,22 +3,14 @@
+ import { eq } from "drizzle-orm";
+ import i18next from "i18next";
+ import { articles } from "../../db/schema/index.js";
++import { findArticle } from "../helpers/articles.js";
++import { findComments } from "../helpers/comments.js";
+ import { validateArticle } from "../validators/article.js";
+ 
+ export default (app) => {
+-  const findArticle = async (id) => {
+-    const [article] = await app.db
+-      .select()
+-      .from(articles)
+-      .where(eq(articles.id, Number(id)))
+-      .limit(1);
+-
+-    return article ?? null;
+-  };
+-
+   const updateArticle = async (req, reply) => {
+     const { id } = req.params;
+-    const article = await findArticle(id);
++    const article = await findArticle(app, id);
+     const { data, errors } = validateArticle(req.body.data);
+ 
+     if (errors) {
+@@ -77,11 +69,22 @@ export default (app) => {
+       return reply;
+     })
+     .get("/articles/:id", { name: "article" }, async (req, reply) => {
+-      reply.render("articles/show", { article: await findArticle(req.params.id) });
++      const article = await findArticle(app, req.params.id);
++
++      if (!article) {
++        reply.callNotFound();
++        return reply;
++      }
++
++      reply.render("articles/show", {
++        article,
++        comments: await findComments(app, article.id),
++        comment: {},
++      });
+       return reply;
+     })
+     .get("/articles/:id/edit", { name: "editArticle" }, async (req, reply) => {
+-      reply.render("articles/edit", { article: await findArticle(req.params.id) });
++      reply.render("articles/edit", { article: await findArticle(app, req.params.id) });
+       return reply;
+     })
+     // HTML-форма умеет только GET и POST, поэтому PATCH и DELETE приходят
+diff --git a/server/routes/comments.js b/server/routes/comments.js
+new file mode 100644
+index 0000000..f05c461
+--- /dev/null
++++ b/server/routes/comments.js
+@@ -0,0 +1,38 @@
++// @ts-check
++
++import i18next from "i18next";
++import { comments } from "../../db/schema/index.js";
++import { findArticle } from "../helpers/articles.js";
++import { findComments } from "../helpers/comments.js";
++import { validateComment } from "../validators/comment.js";
++
++export default (app) => {
++  app.post("/articles/:id/comments", { name: "createComment" }, async (req, reply) => {
++    const { id } = req.params;
++    const article = await findArticle(app, id);
++
++    if (!article) {
++      reply.callNotFound();
++      return reply;
++    }
++
++    const { data, errors } = validateComment(req.body.data);
++
++    if (errors) {
++      req.flash("error", i18next.t("views.comments.create.error"));
++      reply.code(422);
++      reply.render("articles/show", {
++        article,
++        comments: await findComments(app, article.id),
++        comment: req.body.data ?? {},
++        errors,
++      });
++      return reply;
++    }
++
++    await app.db.insert(comments).values({ ...data, articleId: article.id });
++    req.flash("info", i18next.t("views.comments.create.success"));
++    reply.redirect(app.reverse("article", { id: article.id }));
++    return reply;
++  });
++};
+diff --git a/server/routes/index.js b/server/routes/index.js
+index 0490b24..f01589a 100644
+--- a/server/routes/index.js
++++ b/server/routes/index.js
+@@ -1,9 +1,10 @@
+ // @ts-check
+ 
+ import articles from "./articles.js";
++import comments from "./comments.js";
+ import root from "./root.js";
+ 
+-const controllers = [root, articles];
++const controllers = [root, articles, comments];
+ 
+ export default (app) => {
+   controllers.forEach((f) => {
+diff --git a/server/validators/article.js b/server/validators/article.js
+index bd0b3d3..5c0d463 100644
+--- a/server/validators/article.js
++++ b/server/validators/article.js
+@@ -2,6 +2,7 @@
+ 
+ import { createInsertSchema } from "drizzle-zod";
+ import { articles } from "../../db/schema/index.js";
++import { formatErrors } from "./errors.js";
+ 
+ // Схема выводится из схемы таблицы, поэтому типы колонок и обязательность
+ // полей не дублируются руками. Сверху добавлено только то, чего в таблице нет:
+@@ -12,17 +13,6 @@ const articleSchema = createInsertSchema(articles, {
+   content: (schema) => schema.min(1),
+ }).pick({ title: true, content: true });
+ 
+-/**
+- * Приводит ошибки zod к виду, который ожидают шаблоны: массив объектов
+- * `{ path, message }`. Ровно так выглядели ошибки Sequelize, и миксины форм
+- * группируют их по `path`.
+- */
+-const formatErrors = (error) =>
+-  error.issues.map((issue) => ({
+-    path: issue.path.join("."),
+-    message: issue.message,
+-  }));
+-
+ export const validateArticle = (data) => {
+   const result = articleSchema.safeParse(data ?? {});
+ 
+diff --git a/server/validators/comment.js b/server/validators/comment.js
+new file mode 100644
+index 0000000..8bc9a3e
+--- /dev/null
++++ b/server/validators/comment.js
+@@ -0,0 +1,22 @@
++// @ts-check
++
++import { createInsertSchema } from "drizzle-zod";
++import { z } from "zod";
++import { comments } from "../../db/schema/index.js";
++import { formatErrors } from "./errors.js";
++
++// Имя необязательно: пустую строку оставляем в базе, а подстановку «Аноним»
++// делает шаблон через перевод. Так английский интерфейс не покажет русское
++// слово из базы. Обязателен только текст комментария.
++const commentSchema = createInsertSchema(comments, {
++  author: z.string().trim().optional().default(""),
++  content: z.string().trim().min(1),
++}).pick({ author: true, content: true });
++
++export const validateComment = (data) => {
++  const result = commentSchema.safeParse(data ?? {});
++
++  return result.success
++    ? { data: result.data, errors: null }
++    : { data: null, errors: formatErrors(result.error) };
++};
+diff --git a/server/validators/errors.js b/server/validators/errors.js
+new file mode 100644
+index 0000000..df472a5
+--- /dev/null
++++ b/server/validators/errors.js
+@@ -0,0 +1,12 @@
++// @ts-check
++
++/**
++ * Приводит ошибки zod к виду, который ожидают шаблоны: массив объектов
++ * `{ path, message }`. Ровно так выглядели ошибки Sequelize, и миксины форм
++ * группируют их по `path`.
++ */
++export const formatErrors = (error) =>
++  error.issues.map((issue) => ({
++    path: issue.path.join("."),
++    message: issue.message,
++  }));
+diff --git a/server/views/articles/show.eta b/server/views/articles/show.eta
+index b0e7009..2df3642 100644
+--- a/server/views/articles/show.eta
++++ b/server/views/articles/show.eta
+@@ -1,2 +1,24 @@
+ <% layout("../layouts/application", { header: it.article.title }) %>
+ <%~ include("../mixins/article", { content: it.article.content }) %>
++
++<section class="mt-10 border-t border-gray-200 pt-6">
++  <h2 class="mb-4 text-2xl font-semibold"><%= it.t('views.comments.header') %></h2>
++
++  <% if (it.comments.length === 0) { %>
++  <p class="text-gray-600"><%= it.t('views.comments.empty') %></p>
++  <% } else { %>
++  <div class="space-y-4">
++    <% it.comments.forEach((comment) => { %>
++    <%~ include("../comments/comment", { comment }) %>
++    <% }) %>
++  </div>
++  <% } %>
++
++  <div class="mt-8">
++    <%~ include("../comments/form", {
++      article: it.article,
++      comment: it.comment ?? {},
++      errors: it.errors,
++    }) %>
++  </div>
++</section>
+diff --git a/server/views/comments/comment.eta b/server/views/comments/comment.eta
+new file mode 100644
+index 0000000..44cb5a4
+--- /dev/null
++++ b/server/views/comments/comment.eta
+@@ -0,0 +1,9 @@
++<div class="rounded border border-gray-200 bg-gray-50 p-4">
++  <div class="mb-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
++    <span class="font-semibold text-gray-900"><%= it.comment.author || it.t('views.comments.anonymous') %></span>
++    <span><%= it.formatDate(it.comment.createdAt) %></span>
++  </div>
++  <% it.comment.content.split('\n').forEach((line) => { %>
++  <p class="mb-1"><%= line %></p>
++  <% }) %>
++</div>
+diff --git a/server/views/comments/form.eta b/server/views/comments/form.eta
+new file mode 100644
+index 0000000..8e89c83
+--- /dev/null
++++ b/server/views/comments/form.eta
+@@ -0,0 +1,41 @@
++<%
++  const errors = it.errors ?? [];
++  const errorFor = (path) => errors
++    .filter((error) => error.path === path)
++    .map(({ message }) => message)
++    .join('. ');
++  const authorError = errorFor('author');
++  const contentError = errorFor('content');
++  const fieldClass = 'w-full rounded border border-gray-300 px-3 py-2';
++  const comment = it.comment ?? {};
++%>
++<form class="rounded border border-gray-200 p-4" action="<%= it.route('createComment', { id: it.article.id }) %>" method="post">
++  <h3 class="mb-4 text-lg font-semibold"><%= it.t('views.comments.form.header') %></h3>
++  <div class="mb-4">
++    <label class="mb-1 block text-sm font-medium" for="comment_author"><%= it.t('views.comments.author.label') %></label>
++    <input
++      id="comment_author"
++      name="data[author]"
++      class="<%= fieldClass %><%= authorError ? ' border-red-500' : '' %>"
++      type="text"
++      value="<%= comment.author || '' %>"
++    >
++    <% if (authorError) { %>
++    <p class="mt-1 text-sm text-red-600"><%= authorError %></p>
++    <% } %>
++  </div>
++  <div class="mb-4">
++    <label class="mb-1 block text-sm font-medium" for="comment_content"><%= it.t('views.comments.content.label') %></label>
++    <textarea
++      id="comment_content"
++      name="data[content]"
++      class="<%= fieldClass %><%= contentError ? ' border-red-500' : '' %>"
++      rows="4"
++      placeholder="<%= it.t('views.comments.content.placeholder') %>"
++    ><%= comment.content || '' %></textarea>
++    <% if (contentError) { %>
++    <p class="mt-1 text-sm text-red-600"><%= contentError %></p>
++    <% } %>
++  </div>
++  <%~ include("../mixins/submit", { value: it.t('views.comments.submit') }) %>
++</form>

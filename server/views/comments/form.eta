@@ -1,0 +1,41 @@
+<%
+  const errors = it.errors ?? [];
+  const errorFor = (path) => errors
+    .filter((error) => error.path === path)
+    .map(({ message }) => message)
+    .join('. ');
+  const authorError = errorFor('author');
+  const contentError = errorFor('content');
+  const fieldClass = 'w-full rounded border border-gray-300 px-3 py-2';
+  const comment = it.comment ?? {};
+%>
+<form class="rounded border border-gray-200 p-4" action="<%= it.route('createComment', { id: it.article.id }) %>" method="post">
+  <h3 class="mb-4 text-lg font-semibold"><%= it.t('views.comments.form.header') %></h3>
+  <div class="mb-4">
+    <label class="mb-1 block text-sm font-medium" for="comment_author"><%= it.t('views.comments.author.label') %></label>
+    <input
+      id="comment_author"
+      name="data[author]"
+      class="<%= fieldClass %><%= authorError ? ' border-red-500' : '' %>"
+      type="text"
+      value="<%= comment.author || '' %>"
+    >
+    <% if (authorError) { %>
+    <p class="mt-1 text-sm text-red-600"><%= authorError %></p>
+    <% } %>
+  </div>
+  <div class="mb-4">
+    <label class="mb-1 block text-sm font-medium" for="comment_content"><%= it.t('views.comments.content.label') %></label>
+    <textarea
+      id="comment_content"
+      name="data[content]"
+      class="<%= fieldClass %><%= contentError ? ' border-red-500' : '' %>"
+      rows="4"
+      placeholder="<%= it.t('views.comments.content.placeholder') %>"
+    ><%= comment.content || '' %></textarea>
+    <% if (contentError) { %>
+    <p class="mt-1 text-sm text-red-600"><%= contentError %></p>
+    <% } %>
+  </div>
+  <%~ include("../mixins/submit", { value: it.t('views.comments.submit') }) %>
+</form>

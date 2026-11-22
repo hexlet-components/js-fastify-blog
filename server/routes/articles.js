@@ -3,22 +3,14 @@
 import { eq } from "drizzle-orm";
 import i18next from "i18next";
 import { articles } from "../../db/schema/index.js";
+import { findArticle } from "../helpers/articles.js";
+import { findComments } from "../helpers/comments.js";
 import { validateArticle } from "../validators/article.js";
 
 export default (app) => {
-  const findArticle = async (id) => {
-    const [article] = await app.db
-      .select()
-      .from(articles)
-      .where(eq(articles.id, Number(id)))
-      .limit(1);
-
-    return article ?? null;
-  };
-
   const updateArticle = async (req, reply) => {
     const { id } = req.params;
-    const article = await findArticle(id);
+    const article = await findArticle(app, id);
     const { data, errors } = validateArticle(req.body.data);
 
     if (errors) {
@@ -77,11 +69,22 @@ export default (app) => {
       return reply;
     })
     .get("/articles/:id", { name: "article" }, async (req, reply) => {
-      reply.render("articles/show", { article: await findArticle(req.params.id) });
+      const article = await findArticle(app, req.params.id);
+
+      if (!article) {
+        reply.callNotFound();
+        return reply;
+      }
+
+      reply.render("articles/show", {
+        article,
+        comments: await findComments(app, article.id),
+        comment: {},
+      });
       return reply;
     })
     .get("/articles/:id/edit", { name: "editArticle" }, async (req, reply) => {
-      reply.render("articles/edit", { article: await findArticle(req.params.id) });
+      reply.render("articles/edit", { article: await findArticle(app, req.params.id) });
       return reply;
     })
     // HTML-форма умеет только GET и POST, поэтому PATCH и DELETE приходят

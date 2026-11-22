@@ -63,6 +63,27 @@ export default {
         },
       },
 
+      comments: {
+        header: "Comments",
+        empty: "No comments yet. Be the first to write one.",
+        anonymous: "Anonymous",
+        form: {
+          header: "Add a comment",
+        },
+        author: {
+          label: "Name (optional)",
+        },
+        content: {
+          label: "Comment",
+          placeholder: "Write a comment",
+        },
+        submit: "Add comment",
+        create: {
+          success: "Comment was added",
+          error: "Failed to add comment",
+        },
+      },
+
       welcome: {
         index: {
           hello: "Hello from Hexlet!",

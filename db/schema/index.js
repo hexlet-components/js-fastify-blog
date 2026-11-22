@@ -15,4 +15,16 @@ export const articles = pgTable("articles", {
   updatedAt: timestamp("updated_at", { mode: "string" }).notNull().defaultNow(),
 });
 
-export default { articles };
+// Автор необязателен: пустая строка означает «Аноним», но перевод подставляет
+// шаблон, чтобы английский интерфейс не показывал русское слово из базы.
+export const comments = pgTable("comments", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  articleId: integer("article_id")
+    .notNull()
+    .references(() => articles.id, { onDelete: "cascade" }),
+  author: text("author").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at", { mode: "string" }).notNull().defaultNow(),
+});
+
+export default { articles, comments };

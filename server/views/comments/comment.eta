@@ -1,0 +1,9 @@
+<div class="rounded border border-gray-200 bg-gray-50 p-4">
+  <div class="mb-2 flex flex-wrap items-center gap-3 text-sm text-gray-600">
+    <span class="font-semibold text-gray-900"><%= it.comment.author || it.t('views.comments.anonymous') %></span>
+    <span><%= it.formatDate(it.comment.createdAt) %></span>
+  </div>
+  <% it.comment.content.split('\n').forEach((line) => { %>
+  <p class="mb-1"><%= line %></p>
+  <% }) %>
+</div>

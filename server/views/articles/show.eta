@@ -1,2 +1,24 @@
 <% layout("../layouts/application", { header: it.article.title }) %>
 <%~ include("../mixins/article", { content: it.article.content }) %>
+
+<section class="mt-10 border-t border-gray-200 pt-6">
+  <h2 class="mb-4 text-2xl font-semibold"><%= it.t('views.comments.header') %></h2>
+
+  <% if (it.comments.length === 0) { %>
+  <p class="text-gray-600"><%= it.t('views.comments.empty') %></p>
+  <% } else { %>
+  <div class="space-y-4">
+    <% it.comments.forEach((comment) => { %>
+    <%~ include("../comments/comment", { comment }) %>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <div class="mt-8">
+    <%~ include("../comments/form", {
+      article: it.article,
+      comment: it.comment ?? {},
+      errors: it.errors,
+    }) %>
+  </div>
+</section>
